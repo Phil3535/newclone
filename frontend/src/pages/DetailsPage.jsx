@@ -3,31 +3,48 @@ import { useParams } from 'react-router-dom';
 import { Star, Play, Plus, Check } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import ContentRow from '../components/ContentRow';
-import { getAllContent, getTrending } from '../mockData';
+import VideoPlayer from '../components/VideoPlayer';
+import { contentAPI } from '../services/api';
 import { useToast } from '../hooks/use-toast';
 
 const DetailsPage = () => {
   const { type, id } = useParams();
   const [content, setContent] = useState(null);
+  const [similarContent, setSimilarContent] = useState([]);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    const allContent = getAllContent();
-    const item = allContent.find(c => c.id === parseInt(id) && c.type === type);
-    setContent(item);
+    const fetchDetails = async () => {
+      setLoading(true);
+      try {
+        const details = await contentAPI.getDetails(type, id);
+        setContent(details);
 
-    // Check if in watchlist
-    const watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
-    setIsInWatchlist(watchlist.some(w => w.id === parseInt(id)));
+        // Fetch similar content (trending as fallback)
+        const similar = await contentAPI.getTrending();
+        setSimilarContent(similar.slice(0, 10));
+
+        // Check if in watchlist
+        const watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+        setIsInWatchlist(watchlist.some(w => w.id === parseInt(id) && w.type === type));
+      } catch (error) {
+        console.error('Error fetching details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetails();
   }, [type, id]);
 
   const toggleWatchlist = () => {
     const watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
     
     if (isInWatchlist) {
-      const updated = watchlist.filter(w => w.id !== content.id);
+      const updated = watchlist.filter(w => !(w.id === parseInt(id) && w.type === type));
       localStorage.setItem('watchlist', JSON.stringify(updated));
       setIsInWatchlist(false);
       toast({
@@ -45,7 +62,19 @@ const DetailsPage = () => {
     }
   };
 
-  if (!content) {
+  const handlePlayTrailer = () => {
+    if (content && content.videos && content.videos.length > 0) {
+      setShowPlayer(true);
+    } else {
+      toast({
+        title: "No Trailer Available",
+        description: "Sorry, no trailer is available for this content.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
@@ -53,16 +82,30 @@ const DetailsPage = () => {
     );
   }
 
+  if (!content) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Content not found</div>
+      </div>
+    );
+  }
+
+  const firstVideo = content.videos && content.videos.length > 0 ? content.videos[0] : null;
+
   return (
     <div className="min-h-screen bg-black">
       {/* Hero Section */}
       <div className="relative h-[80vh] w-full overflow-hidden">
         <div className="absolute inset-0">
-          <img
-            src={content.backdrop}
-            alt={content.title}
-            className="w-full h-full object-cover"
-          />
+          {content.backdrop ? (
+            <img
+              src={content.backdrop}
+              alt={content.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-900" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
         </div>
@@ -84,25 +127,29 @@ const DetailsPage = () => {
               {content.type === 'movie' ? (
                 <span>{content.duration}</span>
               ) : (
-                <span>{content.seasons} Seasons</span>
+                <span>{content.seasons} Season{content.seasons > 1 ? 's' : ''}</span>
               )}
             </div>
             <p className="text-lg text-gray-200 mb-6 leading-relaxed">
               {content.synopsis}
             </p>
-            <div className="mb-6">
-              <div className="text-sm text-gray-400 mb-2">Genre</div>
-              <div className="text-white">{content.genre}</div>
-            </div>
-            <div className="mb-8">
-              <div className="text-sm text-gray-400 mb-2">Cast</div>
-              <div className="text-white">{content.cast}</div>
-            </div>
+            {content.genre && (
+              <div className="mb-6">
+                <div className="text-sm text-gray-400 mb-2">Genre</div>
+                <div className="text-white">{content.genre}</div>
+              </div>
+            )}
+            {content.cast && (
+              <div className="mb-8">
+                <div className="text-sm text-gray-400 mb-2">Cast</div>
+                <div className="text-white">{content.cast}</div>
+              </div>
+            )}
             <div className="flex gap-4">
               <Button
                 size="lg"
                 className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold"
-                onClick={() => setShowPlayer(true)}
+                onClick={handlePlayTrailer}
               >
                 <Play className="h-5 w-5 mr-2 fill-black" />
                 Play Trailer
@@ -132,33 +179,19 @@ const DetailsPage = () => {
 
       {/* Video Player Modal */}
       {showPlayer && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4">
-          <div className="relative w-full max-w-5xl">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute -top-12 right-0 text-white hover:text-yellow-400"
-              onClick={() => setShowPlayer(false)}
-            >
-              <span className="text-2xl">✕</span>
-            </Button>
-            <div className="relative pt-[56.25%] bg-gray-900 rounded-lg overflow-hidden">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-white">
-                  <Play className="h-16 w-16 mx-auto mb-4 text-yellow-400" />
-                  <p className="text-xl">Trailer Player</p>
-                  <p className="text-sm text-gray-400 mt-2">Video player will be integrated with TMDB API</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <VideoPlayer
+          videoKey={firstVideo ? firstVideo.key : null}
+          videoName={firstVideo ? firstVideo.name : null}
+          onClose={() => setShowPlayer(false)}
+        />
       )}
 
       {/* Similar Content */}
-      <div className="relative z-10 py-16">
-        <ContentRow title="More Like This" items={getTrending().slice(0, 8)} />
-      </div>
+      {similarContent.length > 0 && (
+        <div className="relative z-10 py-16">
+          <ContentRow title="More Like This" items={similarContent} />
+        </div>
+      )}
     </div>
   );
 };
