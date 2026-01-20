@@ -3,26 +3,39 @@ import { useSearchParams } from 'react-router-dom';
 import { Search as SearchIcon } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import ContentCard from '../components/ContentCard';
-import { searchContent } from '../mockData';
+import { contentAPI } from '../services/api';
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const q = searchParams.get('q');
     if (q) {
       setQuery(q);
-      setResults(searchContent(q));
+      performSearch(q);
     }
   }, [searchParams]);
+
+  const performSearch = async (searchQuery) => {
+    setLoading(true);
+    try {
+      const data = await contentAPI.search(searchQuery);
+      setResults(data);
+    } catch (error) {
+      console.error('Error searching:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (query.trim()) {
       setSearchParams({ q: query });
-      setResults(searchContent(query));
+      performSearch(query);
     }
   };
 
@@ -46,7 +59,11 @@ const SearchPage = () => {
         </form>
 
         {/* Results */}
-        {query && (
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="text-white text-xl">Searching...</div>
+          </div>
+        ) : query && (
           <div>
             <h2 className="text-2xl font-semibold text-white mb-6">
               {results.length > 0 ? (
@@ -66,7 +83,7 @@ const SearchPage = () => {
           </div>
         )}
 
-        {!query && (
+        {!query && !loading && (
           <div className="text-center py-20">
             <SearchIcon className="h-16 w-16 text-gray-600 mx-auto mb-4" />
             <p className="text-gray-400 text-lg">Start searching for your favorite content</p>
