@@ -74,6 +74,84 @@ async def get_status_checks():
     
     return status_checks
 
+# Content Endpoints
+@api_router.get("/content/trending")
+async def get_trending(page: int = Query(1, ge=1, le=100)):
+    """Get trending movies and TV shows"""
+    try:
+        results = TMDBService.get_trending(page)
+        return {"results": results, "page": page}
+    except Exception as e:
+        logger.error(f"Error fetching trending: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch trending content")
+
+@api_router.get("/content/movies")
+async def get_movies(page: int = Query(1, ge=1, le=100)):
+    """Get popular movies"""
+    try:
+        results = TMDBService.get_movies(page)
+        return {"results": results, "page": page}
+    except Exception as e:
+        logger.error(f"Error fetching movies: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch movies")
+
+@api_router.get("/content/tv-shows")
+async def get_tv_shows(page: int = Query(1, ge=1, le=100)):
+    """Get popular TV shows"""
+    try:
+        results = TMDBService.get_tv_shows(page)
+        return {"results": results, "page": page}
+    except Exception as e:
+        logger.error(f"Error fetching TV shows: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch TV shows")
+
+@api_router.get("/content/anime")
+async def get_anime(page: int = Query(1, ge=1, le=100)):
+    """Get anime content"""
+    try:
+        results = TMDBService.get_anime(page)
+        return {"results": results, "page": page}
+    except Exception as e:
+        logger.error(f"Error fetching anime: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch anime")
+
+@api_router.get("/content/details/{content_type}/{content_id}")
+async def get_content_details(content_type: str, content_id: int):
+    """Get detailed information for a movie or TV show"""
+    if content_type not in ['movie', 'tv']:
+        raise HTTPException(status_code=400, detail="Invalid content type. Use 'movie' or 'tv'")
+    
+    try:
+        result = TMDBService.get_details(content_type, content_id)
+        if not result:
+            raise HTTPException(status_code=404, detail="Content not found")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching content details: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch content details")
+
+@api_router.get("/content/search")
+async def search_content(q: str = Query(..., min_length=1), page: int = Query(1, ge=1, le=100)):
+    """Search for movies and TV shows"""
+    try:
+        results = TMDBService.search(q, page)
+        return {"results": results, "page": page, "query": q}
+    except Exception as e:
+        logger.error(f"Error searching content: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to search content")
+
+@api_router.get("/content/genre/{genre_name}")
+async def get_by_genre(genre_name: str, page: int = Query(1, ge=1, le=100)):
+    """Get content by genre"""
+    try:
+        results = TMDBService.get_by_genre(genre_name, page)
+        return {"results": results, "page": page, "genre": genre_name}
+    except Exception as e:
+        logger.error(f"Error fetching by genre: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch content by genre")
+
 # Include the router in the main app
 app.include_router(api_router)
 
