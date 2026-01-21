@@ -38,26 +38,26 @@ const ChannelsPage = () => {
   }, []);
 
   const loadData = async () => {
-    console.log('=== CHANNELS PAGE: Starting loadData ===');
+    addDebug('Starting to load data...');
     setLoading(true);
     
     try {
       // Check authentication
       const isAuth = authService.isAuthenticated();
-      console.log('Is authenticated:', isAuth);
+      addDebug(`Authentication check: ${isAuth ? 'PASSED' : 'FAILED'}`);
       
       if (!isAuth) {
-        console.log('Not authenticated, redirecting to login');
+        addDebug('Redirecting to login (not authenticated)');
         navigate('/login');
         return;
       }
 
       // Get active profile
       const profileId = localStorage.getItem('active_profile_id');
-      console.log('Active profile ID:', profileId);
+      addDebug(`Profile ID: ${profileId || 'NOT FOUND'}`);
       
       if (!profileId) {
-        console.log('No profile ID found');
+        addDebug('No profile ID - redirecting to dashboard');
         toast({
           title: 'No IPTV Connection',
           description: 'Please connect your IPTV service first.',
@@ -66,35 +66,37 @@ const ChannelsPage = () => {
         return;
       }
 
-      console.log('Loading channels for profile:', profileId);
       setProfile({ profile_id: profileId });
+      addDebug('Requesting channels from server...');
 
       // Load categories and channels
-      console.log('Fetching categories and channels...');
       const [cats, chans] = await Promise.all([
         iptvService.getCategories(profileId),
         iptvService.getChannels(profileId)
       ]);
 
-      console.log('Categories loaded:', cats.length, cats);
-      console.log('Channels loaded:', chans.length);
-      console.log('First 3 channels:', chans.slice(0, 3));
+      addDebug(`Categories loaded: ${cats.length}`);
+      addDebug(`Channels loaded: ${chans.length}`);
 
       setCategories(cats);
       setChannels(chans);
       setFilteredChannels(chans);
       
-      console.log('=== CHANNELS PAGE: Data loaded successfully ===');
+      if (chans.length === 0) {
+        addDebug('WARNING: No channels returned from IPTV server!');
+      } else {
+        addDebug(`SUCCESS: ${chans.length} channels ready to watch`);
+      }
     } catch (error) {
-      console.error('=== CHANNELS PAGE: Error loading data ===', error);
+      addDebug(`ERROR: ${error.message}`);
       toast({
         title: 'Error Loading Channels',
-        description: error.message || 'Failed to load channels. Please try reconnecting your IPTV.',
+        description: error.message || 'Failed to load channels.',
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
-      console.log('=== CHANNELS PAGE: Loading complete ===');
+      addDebug('Loading complete');
     }
   };
 
