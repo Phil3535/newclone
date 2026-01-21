@@ -32,12 +32,26 @@ const ChannelsPage = () => {
   }, []);
 
   const loadData = async () => {
+    console.log('=== CHANNELS PAGE: Starting loadData ===');
     setLoading(true);
     
     try {
+      // Check authentication
+      const isAuth = authService.isAuthenticated();
+      console.log('Is authenticated:', isAuth);
+      
+      if (!isAuth) {
+        console.log('Not authenticated, redirecting to login');
+        navigate('/login');
+        return;
+      }
+
       // Get active profile
       const profileId = localStorage.getItem('active_profile_id');
+      console.log('Active profile ID:', profileId);
+      
       if (!profileId) {
+        console.log('No profile ID found');
         toast({
           title: 'No IPTV Connection',
           description: 'Please connect your IPTV service first.',
@@ -50,26 +64,31 @@ const ChannelsPage = () => {
       setProfile({ profile_id: profileId });
 
       // Load categories and channels
+      console.log('Fetching categories and channels...');
       const [cats, chans] = await Promise.all([
         iptvService.getCategories(profileId),
         iptvService.getChannels(profileId)
       ]);
 
-      console.log('Categories loaded:', cats.length);
+      console.log('Categories loaded:', cats.length, cats);
       console.log('Channels loaded:', chans.length);
+      console.log('First 3 channels:', chans.slice(0, 3));
 
       setCategories(cats);
       setChannels(chans);
       setFilteredChannels(chans);
+      
+      console.log('=== CHANNELS PAGE: Data loaded successfully ===');
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('=== CHANNELS PAGE: Error loading data ===', error);
       toast({
         title: 'Error Loading Channels',
-        description: 'Failed to load channels. Please try reconnecting your IPTV.',
+        description: error.message || 'Failed to load channels. Please try reconnecting your IPTV.',
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
+      console.log('=== CHANNELS PAGE: Loading complete ===');
     }
   };
 
