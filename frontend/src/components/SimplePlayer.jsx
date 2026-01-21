@@ -1,32 +1,51 @@
 import React from 'react';
-import { X } from 'lucide-react';
-import { Button } from './ui/button';
 
 const SimplePlayer = ({ streamUrl, channelName, onClose }) => {
   return (
-    <div className="fixed inset-0 z-50 bg-black">
-      {/* Close Button */}
-      <Button
-        onClick={onClose}
-        className="absolute top-4 right-4 z-10 bg-gray-900 hover:bg-gray-800"
-      >
-        <X className="h-6 w-6" />
-      </Button>
-
-      {/* Channel Name */}
-      <div className="absolute top-4 left-4 z-10 bg-black/70 px-4 py-2 rounded">
-        <p className="text-white font-semibold">{channelName}</p>
-      </div>
-
-      {/* Simple Native Video */}
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'black',
+      zIndex: 9999
+    }}>
       <video
         src={streamUrl}
         controls
         autoPlay
         playsInline
         webkit-playsinline="true"
-        className="w-full h-full"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain'
+        }}
+        onError={(e) => {
+          console.error('Video error:', e);
+          alert('Video failed to load. Close and try again.');
+        }}
       />
+      
+      <button
+        onClick={onClose}
+        style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          padding: '10px 15px',
+          fontSize: '16px',
+          cursor: 'pointer',
+          zIndex: 10000
+        }}
+      >
+        ✕ Close
+      </button>
     </div>
   );
 };
