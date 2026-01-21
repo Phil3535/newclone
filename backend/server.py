@@ -49,18 +49,18 @@ logger = logging.getLogger(__name__)
 
 # Models
 class UserRegister(BaseModel):
-    email: str
+    username: str
     password: str
     full_name: Optional[str] = None
     
-    @validator('email')
-    def validate_email(cls, v):
-        if '@' not in v:
-            raise ValueError('Invalid email address')
+    @validator('username')
+    def validate_username(cls, v):
+        if len(v) < 3:
+            raise ValueError('Username must be at least 3 characters')
         return v.lower()
 
 class UserLogin(BaseModel):
-    email: str
+    username: str
     password: str
 
 class IPTVConnect(BaseModel):
