@@ -325,6 +325,14 @@ const ChannelsPage = () => {
           onClose={() => setPlayingStream(null)}
         />
       )}
+
+      {/* Show stream URL for debugging */}
+      {playingStream && (
+        <div className="fixed bottom-4 left-4 z-[60] bg-black/90 border border-yellow-400 rounded p-3 max-w-md">
+          <p className="text-yellow-400 text-xs font-bold mb-1">DEBUG - Stream URL:</p>
+          <p className="text-white text-xs break-all font-mono">{playingStream.url}</p>
+        </div>
+      )}
     </div>
   );
 };
