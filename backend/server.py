@@ -188,9 +188,12 @@ async def get_profile(current_user: dict = Depends(get_current_user)):
 @api_router.post("/iptv/connect")
 async def connect_iptv(connection: IPTVConnect, current_user: dict = Depends(get_current_user)):
     """Connect to IPTV service via Xtreme Codes"""
+    # Build full server URL with port
+    full_server_url = f"{connection.server_url}:{connection.port}"
+    
     # Test authentication
     auth_result = XtremeCodesService.authenticate(
-        connection.server_url,
+        full_server_url,
         connection.username,
         connection.password
     )
@@ -200,7 +203,7 @@ async def connect_iptv(connection: IPTVConnect, current_user: dict = Depends(get
     
     # Encrypt credentials
     encrypted_credentials = {
-        "server_url": encrypt_credentials(connection.server_url),
+        "server_url": encrypt_credentials(full_server_url),
         "username": encrypt_credentials(connection.username),
         "password": encrypt_credentials(connection.password),
         "profile_name": connection.profile_name,
