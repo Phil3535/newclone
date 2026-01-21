@@ -1,16 +1,20 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Query
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, validator
 from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
-from tmdb_service import TMDBService
-
+from datetime import datetime, timedelta
+import jwt
+from passlib.context import CryptContext
+from xtreme_codes_service import XtremeCodesService
+import base64
+from cryptography.fernet import Fernet
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -18,150 +22,23 @@ load_dotenv(ROOT_DIR / '.env')
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[os.environ.get('DB_NAME', 'empire_streams')]
 
-# Create the main app without a prefix
-app = FastAPI()
+# Security
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+security = HTTPBearer()
+SECRET_KEY = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production')
+ALGORITHM = "HS256"
+
+# Encryption for IPTV credentials
+ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY', Fernet.generate_key().decode())
+cipher_suite = Fernet(ENCRYPTION_KEY.encode())
+
+# Create the main app
+app = FastAPI(title="Empire Streams API")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
-
-
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class StatusCheckCreate(BaseModel):
-    client_name: str
-
-class WatchlistItem(BaseModel):
-    user_id: str
-    content_id: int
-    content_type: str
-    content_data: dict
-    added_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "BeeTV API - Ready to stream!"}
-
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
-
-# Content Endpoints
-@api_router.get("/content/trending")
-async def get_trending(page: int = Query(1, ge=1, le=100)):
-    """Get trending movies and TV shows"""
-    try:
-        results = TMDBService.get_trending(page)
-        return {"results": results, "page": page}
-    except Exception as e:
-        logger.error(f"Error fetching trending: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to fetch trending content")
-
-@api_router.get("/content/movies")
-async def get_movies(page: int = Query(1, ge=1, le=100)):
-    """Get popular movies"""
-    try:
-        results = TMDBService.get_movies(page)
-        return {"results": results, "page": page}
-    except Exception as e:
-        logger.error(f"Error fetching movies: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to fetch movies")
-
-@api_router.get("/content/tv-shows")
-async def get_tv_shows(page: int = Query(1, ge=1, le=100)):
-    """Get popular TV shows"""
-    try:
-        results = TMDBService.get_tv_shows(page)
-        return {"results": results, "page": page}
-    except Exception as e:
-        logger.error(f"Error fetching TV shows: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to fetch TV shows")
-
-@api_router.get("/content/anime")
-async def get_anime(page: int = Query(1, ge=1, le=100)):
-    """Get anime content"""
-    try:
-        results = TMDBService.get_anime(page)
-        return {"results": results, "page": page}
-    except Exception as e:
-        logger.error(f"Error fetching anime: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to fetch anime")
-
-@api_router.get("/content/details/{content_type}/{content_id}")
-async def get_content_details(content_type: str, content_id: int):
-    """Get detailed information for a movie or TV show"""
-    if content_type not in ['movie', 'tv']:
-        raise HTTPException(status_code=400, detail="Invalid content type. Use 'movie' or 'tv'")
-    
-    try:
-        result = TMDBService.get_details(content_type, content_id)
-        if not result:
-            raise HTTPException(status_code=404, detail="Content not found")
-        return result
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error fetching content details: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to fetch content details")
-
-@api_router.get("/content/search")
-async def search_content(q: str = Query(..., min_length=1), page: int = Query(1, ge=1, le=100)):
-    """Search for movies and TV shows"""
-    try:
-        results = TMDBService.search(q, page)
-        return {"results": results, "page": page, "query": q}
-    except Exception as e:
-        logger.error(f"Error searching content: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to search content")
-
-@api_router.get("/content/genre/{genre_name}")
-async def get_by_genre(genre_name: str, page: int = Query(1, ge=1, le=100)):
-    """Get content by genre"""
-    try:
-        results = TMDBService.get_by_genre(genre_name, page)
-        return {"results": results, "page": page, "genre": genre_name}
-    except Exception as e:
-        logger.error(f"Error fetching by genre: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to fetch content by genre")
-
-# Include the router in the main app
-app.include_router(api_router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Configure logging
 logging.basicConfig(
@@ -169,6 +46,273 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# Models
+class UserRegister(BaseModel):
+    email: str
+    password: str
+    full_name: Optional[str] = None
+    
+    @validator('email')
+    def validate_email(cls, v):
+        if '@' not in v:
+            raise ValueError('Invalid email address')
+        return v.lower()
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class IPTVConnect(BaseModel):
+    server_url: str
+    username: str
+    password: str
+    profile_name: Optional[str] = "Default"
+    
+    @validator('server_url')
+    def validate_server_url(cls, v):
+        if not v.startswith('http'):
+            raise ValueError('Server URL must start with http:// or https://')
+        return v
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+class User(BaseModel):
+    id: str
+    email: str
+    full_name: Optional[str]
+    subscription_status: str = "trial"
+    subscription_expires: Optional[datetime] = None
+    created_at: datetime
+
+# Helper functions
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(days=7)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+        
+        user = await db.users.find_one({"_id": user_id})
+        if user is None:
+            raise HTTPException(status_code=401, detail="User not found")
+        
+        return user
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+def encrypt_credentials(data: str) -> str:
+    """Encrypt sensitive data"""
+    return cipher_suite.encrypt(data.encode()).decode()
+
+def decrypt_credentials(encrypted_data: str) -> str:
+    """Decrypt sensitive data"""
+    return cipher_suite.decrypt(encrypted_data.encode()).decode()
+
+# Auth Endpoints
+@api_router.post("/auth/register", response_model=Token)
+async def register(user_data: UserRegister):
+    """Register a new user"""
+    # Check if user exists
+    existing_user = await db.users.find_one({"email": user_data.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Create user
+    user_id = str(uuid.uuid4())
+    hashed_password = pwd_context.hash(user_data.password)
+    
+    user = {
+        "_id": user_id,
+        "email": user_data.email,
+        "password": hashed_password,
+        "full_name": user_data.full_name,
+        "subscription_status": "trial",
+        "subscription_expires": datetime.utcnow() + timedelta(days=7),
+        "created_at": datetime.utcnow()
+    }
+    
+    await db.users.insert_one(user)
+    
+    # Create token
+    access_token = create_access_token(data={"sub": user_id})
+    return Token(access_token=access_token)
+
+@api_router.post("/auth/login", response_model=Token)
+async def login(credentials: UserLogin):
+    """Login user"""
+    user = await db.users.find_one({"email": credentials.email})
+    if not user or not pwd_context.verify(credentials.password, user["password"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    access_token = create_access_token(data={"sub": user["_id"]})
+    return Token(access_token=access_token)
+
+@api_router.get("/user/profile")
+async def get_profile(current_user: dict = Depends(get_current_user)):
+    """Get user profile"""
+    return {
+        "id": current_user["_id"],
+        "email": current_user["email"],
+        "full_name": current_user.get("full_name"),
+        "subscription_status": current_user.get("subscription_status", "trial"),
+        "subscription_expires": current_user.get("subscription_expires"),
+        "created_at": current_user.get("created_at")
+    }
+
+# IPTV Endpoints
+@api_router.post("/iptv/connect")
+async def connect_iptv(connection: IPTVConnect, current_user: dict = Depends(get_current_user)):
+    """Connect to IPTV service via Xtreme Codes"""
+    # Test authentication
+    auth_result = XtremeCodesService.authenticate(
+        connection.server_url,
+        connection.username,
+        connection.password
+    )
+    
+    if not auth_result:
+        raise HTTPException(status_code=400, detail="Failed to authenticate with IPTV server")
+    
+    # Encrypt credentials
+    encrypted_credentials = {
+        "server_url": encrypt_credentials(connection.server_url),
+        "username": encrypt_credentials(connection.username),
+        "password": encrypt_credentials(connection.password),
+        "profile_name": connection.profile_name,
+        "user_info": auth_result.get("user_info", {}),
+        "created_at": datetime.utcnow()
+    }
+    
+    # Save to database
+    profile_id = str(uuid.uuid4())
+    iptv_profile = {
+        "_id": profile_id,
+        "user_id": current_user["_id"],
+        **encrypted_credentials
+    }
+    
+    await db.iptv_profiles.insert_one(iptv_profile)
+    
+    return {
+        "profile_id": profile_id,
+        "profile_name": connection.profile_name,
+        "status": "connected",
+        "user_info": auth_result.get("user_info", {})
+    }
+
+@api_router.get("/iptv/profiles")
+async def get_iptv_profiles(current_user: dict = Depends(get_current_user)):
+    """Get user's IPTV profiles"""
+    profiles = await db.iptv_profiles.find({"user_id": current_user["_id"]}).to_list(100)
+    
+    return [{
+        "profile_id": profile["_id"],
+        "profile_name": profile.get("profile_name", "Default"),
+        "created_at": profile.get("created_at")
+    } for profile in profiles]
+
+@api_router.get("/content/channels")
+async def get_channels(profile_id: str, category_id: Optional[int] = None, current_user: dict = Depends(get_current_user)):
+    """Get live TV channels"""
+    # Get IPTV profile
+    profile = await db.iptv_profiles.find_one({"_id": profile_id, "user_id": current_user["_id"]})
+    if not profile:
+        raise HTTPException(status_code=404, detail="IPTV profile not found")
+    
+    # Decrypt credentials
+    server_url = decrypt_credentials(profile["server_url"])
+    username = decrypt_credentials(profile["username"])
+    password = decrypt_credentials(profile["password"])
+    
+    # Fetch channels
+    channels = XtremeCodesService.get_live_streams(server_url, username, password, category_id)
+    
+    return {"channels": channels}
+
+@api_router.get("/content/categories")
+async def get_categories(profile_id: str, current_user: dict = Depends(get_current_user)):
+    """Get channel categories"""
+    # Get IPTV profile
+    profile = await db.iptv_profiles.find_one({"_id": profile_id, "user_id": current_user["_id"]})
+    if not profile:
+        raise HTTPException(status_code=404, detail="IPTV profile not found")
+    
+    # Decrypt credentials
+    server_url = decrypt_credentials(profile["server_url"])
+    username = decrypt_credentials(profile["username"])
+    password = decrypt_credentials(profile["password"])
+    
+    # Fetch categories
+    categories = XtremeCodesService.get_live_categories(server_url, username, password)
+    
+    return {"categories": categories}
+
+@api_router.get("/content/stream/{stream_id}")
+async def get_stream_url(stream_id: int, profile_id: str, current_user: dict = Depends(get_current_user)):
+    """Get stream URL for playback"""
+    # Get IPTV profile
+    profile = await db.iptv_profiles.find_one({"_id": profile_id, "user_id": current_user["_id"]})
+    if not profile:
+        raise HTTPException(status_code=404, detail="IPTV profile not found")
+    
+    # Decrypt credentials
+    server_url = decrypt_credentials(profile["server_url"])
+    username = decrypt_credentials(profile["username"])
+    password = decrypt_credentials(profile["password"])
+    
+    # Build stream URL
+    stream_url = XtremeCodesService.get_stream_url(server_url, username, password, stream_id)
+    
+    return {"stream_url": stream_url}
+
+@api_router.get("/content/epg")
+async def get_epg(profile_id: str, stream_id: Optional[int] = None, current_user: dict = Depends(get_current_user)):
+    """Get EPG data"""
+    # Get IPTV profile
+    profile = await db.iptv_profiles.find_one({"_id": profile_id, "user_id": current_user["_id"]})
+    if not profile:
+        raise HTTPException(status_code=404, detail="IPTV profile not found")
+    
+    # Decrypt credentials
+    server_url = decrypt_credentials(profile["server_url"])
+    username = decrypt_credentials(profile["username"])
+    password = decrypt_credentials(profile["password"])
+    
+    # Fetch EPG
+    epg_data = XtremeCodesService.get_epg(server_url, username, password, stream_id)
+    
+    return epg_data
+
+@api_router.get("/")
+async def root():
+    return {"message": "Empire Streams API - Stay Tuned!"}
+
+# Include the router in the main app
+app.include_router(api_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
