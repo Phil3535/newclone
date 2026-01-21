@@ -132,29 +132,15 @@ const ChannelsPage = () => {
     if (!profile) return;
 
     try {
-      console.log('Playing channel:', channel.name, 'Stream ID:', channel.stream_id);
+      addDebug(`Clicked: ${channel.name}`);
       
-      toast({
-        title: 'Loading Stream',
-        description: `Getting stream URL for ${channel.name}...`,
-      });
-
       const streamUrl = await iptvService.getStreamUrl(profile.profile_id, channel.stream_id);
       
-      console.log('Stream URL received:', streamUrl);
+      addDebug(`Stream URL: ${streamUrl ? 'Received' : 'NULL'}`);
       
       if (streamUrl) {
-        // Validate URL format
-        if (!streamUrl.includes('http')) {
-          toast({
-            title: 'Invalid Stream URL',
-            description: 'Stream URL format is incorrect',
-            variant: 'destructive',
-          });
-          return;
-        }
-
-        setPlayingStream({
+        // Show preview first instead of playing directly
+        setStreamPreview({
           url: streamUrl,
           name: channel.name,
         });
@@ -166,7 +152,7 @@ const ChannelsPage = () => {
         });
       }
     } catch (error) {
-      console.error('Error playing channel:', error);
+      addDebug(`Error: ${error.message}`);
       toast({
         title: 'Playback Failed',
         description: error.message || 'Failed to start playback',
