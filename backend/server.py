@@ -293,6 +293,42 @@ async def get_stream_url(stream_id: int, profile_id: str, current_user: dict = D
     
     return {"stream_url": stream_url}
 
+@api_router.get("/content/proxy-stream/{profile_id}/{stream_id}.m3u8")
+async def proxy_stream(profile_id: str, stream_id: int, current_user: dict = Depends(get_current_user)):
+    """Proxy stream to bypass CORS"""
+    import httpx
+    from fastapi.responses import StreamingResponse
+    
+    # Get IPTV profile
+    profile = await db.iptv_profiles.find_one({"_id": profile_id, "user_id": current_user["_id"]})
+    if not profile:
+        raise HTTPException(status_code=404, detail="IPTV profile not found")
+    
+    # Decrypt credentials
+    server_url = decrypt_credentials(profile["server_url"])
+    username = decrypt_credentials(profile["username"])
+    password = decrypt_credentials(profile["password"])
+    
+    # Build stream URL
+    stream_url = XtremeCodesService.get_stream_url(server_url, username, password, stream_id)
+    
+    # Proxy the stream
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(stream_url, timeout=30.0)
+            return StreamingResponse(
+                iter([response.content]),
+                media_type="application/vnd.apple.mpegurl",
+                headers={
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, OPTIONS",
+                    "Access-Control-Allow-Headers": "Range",
+                }
+            )
+        except Exception as e:
+            logger.error(f"Proxy stream error: {str(e)}")
+            raise HTTPException(status_code=500, detail="Failed to proxy stream")
+
 @api_router.get("/content/epg")
 async def get_epg(profile_id: str, stream_id: Optional[int] = None, current_user: dict = Depends(get_current_user)):
     """Get EPG data"""
