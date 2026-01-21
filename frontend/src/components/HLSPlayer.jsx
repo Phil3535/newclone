@@ -19,85 +19,117 @@ const HLSPlayer = ({ streamUrl, channelName, onClose }) => {
     }
 
     console.log('HLS Player: Loading stream:', streamUrl);
+    console.log('HLS Player: User agent:', navigator.userAgent);
     setIsLoading(true);
     setError(null);
 
     const video = videoRef.current;
-
-    if (Hls.isSupported()) {
-      console.log('HLS Player: HLS.js is supported');
-      const hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: true,
-        debug: false,
-        xhrSetup: function(xhr, url) {
-          // Add any custom headers if needed
-          console.log('HLS Player: Loading fragment:', url);
-        }
-      });
-      
-      hls.loadSource(streamUrl);
-      hls.attachMedia(video);
-      
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log('HLS Player: Manifest parsed successfully');
-        setIsLoading(false);
-        video.play().catch(e => {
-          console.error('HLS Player: Autoplay failed:', e);
-          setError('Click to play');
-        });
-      });
-
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        console.error('HLS Player: Error event:', data.type, data.details);
+    
+    // Check if iOS/Safari - use native playback
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    
+    if (isIOS || isSafari || video.canPlayType('application/vnd.apple.mpegurl')) {
+      console.log('HLS Player: Using native HLS support (iOS/Safari)');
+      try {
+        video.src = streamUrl;
+        video.load();
         
-        if (data.fatal) {
-          setIsLoading(false);
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              console.error('HLS Player: Network error, trying to recover...');
-              setError('Network error - checking connection...');
-              hls.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              console.error('HLS Player: Media error, trying to recover...');
-              setError('Media error - attempting recovery...');
-              hls.recoverMediaError();
-              break;
-            default:
-              console.error('HLS Player: Fatal error, cannot recover');
-              setError(`Stream error: ${data.details}`);
-              hls.destroy();
-              break;
-          }
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('HLS Player: Native playback started');
+              setIsLoading(false);
+            })
+            .catch(e => {
+              console.error('HLS Player: Native play error:', e);
+              setError('Tap to play');
+              setIsLoading(false);
+            });
         }
-      });
-
-      hlsRef.current = hls;
-
-      return () => {
-        console.log('HLS Player: Cleaning up');
-        hls.destroy();
-      };
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      console.log('HLS Player: Native HLS support (Safari/iOS)');
-      video.src = streamUrl;
-      video.addEventListener('loadedmetadata', () => {
-        console.log('HLS Player: Metadata loaded');
-        setIsLoading(false);
-        video.play().catch(e => {
-          console.error('HLS Player: Play error:', e);
-          setError('Click to play');
+        
+        video.addEventListener('error', (e) => {
+          console.error('HLS Player: Video error:', e, video.error);
+          setError(`Playback failed: ${video.error?.message || 'Unknown error'}`);
+          setIsLoading(false);
         });
-      });
-      video.addEventListener('error', (e) => {
-        console.error('HLS Player: Video error:', e);
-        setError('Stream playback failed');
+        
+        video.addEventListener('loadeddata', () => {
+          console.log('HLS Player: Video data loaded');
+          setIsLoading(false);
+        });
+        
+      } catch (err) {
+        console.error('HLS Player: Setup error:', err);
+        setError(err.message);
         setIsLoading(false);
-      });
+      }
+      
+      return () => {
+        video.src = '';
+        video.load();
+      };
+    }
+    
+    // Desktop - use HLS.js
+    if (Hls.isSupported()) {
+      console.log('HLS Player: Using HLS.js');
+      try {
+        const hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: false,
+          debug: false,
+        });
+        
+        hls.loadSource(streamUrl);
+        hls.attachMedia(video);
+        
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          console.log('HLS Player: Manifest parsed');
+          setIsLoading(false);
+          video.play().catch(e => {
+            console.error('HLS Player: Autoplay failed:', e);
+            setError('Click to play');
+          });
+        });
+
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          console.error('HLS Player: Error:', data.type, data.details, data);
+          
+          if (data.fatal) {
+            setIsLoading(false);
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                setError('Network error - Cannot reach stream');
+                setTimeout(() => hls.startLoad(), 1000);
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                setError('Media error - Invalid stream format');
+                hls.recoverMediaError();
+                break;
+              default:
+                setError(`Stream error: ${data.details}`);
+                hls.destroy();
+                break;
+            }
+          }
+        });
+
+        hlsRef.current = hls;
+
+        return () => {
+          console.log('HLS Player: Cleaning up HLS.js');
+          hls.destroy();
+        };
+      } catch (err) {
+        console.error('HLS Player: HLS.js setup error:', err);
+        setError(err.message);
+        setIsLoading(false);
+      }
     } else {
-      console.error('HLS Player: HLS not supported in this browser');
-      setError('HLS playback not supported in your browser');
+      console.error('HLS Player: No HLS support available');
+      setError('HLS playback not supported on this device');
       setIsLoading(false);
     }
   }, [streamUrl]);
