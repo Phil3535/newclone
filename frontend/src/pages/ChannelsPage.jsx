@@ -87,20 +87,14 @@ const ChannelsPage = () => {
   const playChannel = async (channel) => {
     if (!profile) return;
 
-    const streamUrl = await iptvService.getStreamUrl(profile.profile_id, channel.stream_id);
+    // Use proxied stream URL to bypass CORS
+    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+    const proxiedUrl = `${BACKEND_URL}/api/content/proxy-stream/${profile.profile_id}/${channel.stream_id}.m3u8`;
     
-    if (streamUrl) {
-      setPlayingStream({
-        url: streamUrl,
-        name: channel.name,
-      });
-    } else {
-      toast({
-        title: 'Stream Error',
-        description: 'Could not load stream',
-        variant: 'destructive',
-      });
-    }
+    setPlayingStream({
+      url: proxiedUrl,
+      name: channel.name,
+    });
   };
 
   const handleLogout = () => {
