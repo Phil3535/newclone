@@ -8,6 +8,7 @@ import iptvService from '../services/iptvService';
 
 const IPTVConnectPage = () => {
   const [serverUrl, setServerUrl] = useState('');
+  const [port, setPort] = useState('8080');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [profileName, setProfileName] = useState('My IPTV');
@@ -19,7 +20,7 @@ const IPTVConnectPage = () => {
     e.preventDefault();
     setLoading(true);
 
-    const result = await iptvService.connectIPTV(serverUrl, username, password, profileName);
+    const result = await iptvService.connectIPTV(serverUrl, port, username, password, profileName);
 
     if (result.success) {
       toast({
@@ -61,17 +62,30 @@ const IPTVConnectPage = () => {
             />
           </div>
 
-          <div>
-            <label className="text-white text-sm mb-2 block">Server URL</label>
-            <Input
-              type="text"
-              value={serverUrl}
-              onChange={(e) => setServerUrl(e.target.value)}
-              required
-              className="bg-gray-800 border-gray-700 text-white"
-              placeholder="http://example.com:8080"
-            />
-            <p className="text-gray-500 text-xs mt-1">Example: http://your-server.com:8080</p>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="md:col-span-2">
+              <label className="text-white text-sm mb-2 block">Server URL or IP</label>
+              <Input
+                type="text"
+                value={serverUrl}
+                onChange={(e) => setServerUrl(e.target.value)}
+                required
+                className="bg-gray-800 border-gray-700 text-white"
+                placeholder="example.com or 192.168.1.1"
+              />
+              <p className="text-gray-500 text-xs mt-1">Don't include http:// or port</p>
+            </div>
+            <div>
+              <label className="text-white text-sm mb-2 block">Port</label>
+              <Input
+                type="number"
+                value={port}
+                onChange={(e) => setPort(e.target.value)}
+                required
+                className="bg-gray-800 border-gray-700 text-white"
+                placeholder="8080"
+              />
+            </div>
           </div>
 
           <div>
