@@ -7,7 +7,7 @@ import { useToast } from '../hooks/use-toast';
 import authService from '../services/authService';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
 
-    const result = await authService.login(email, password);
+    const result = await authService.login(username, password);
 
     if (result.success) {
       toast({
@@ -49,14 +49,14 @@ const LoginPage = () => {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="text-white text-sm mb-2 block">Email</label>
+            <label className="text-white text-sm mb-2 block">Username</label>
             <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               className="bg-gray-800 border-gray-700 text-white"
-              placeholder="your@email.com"
+              placeholder="your_username"
             />
           </div>
 
