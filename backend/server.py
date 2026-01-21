@@ -65,14 +65,23 @@ class UserLogin(BaseModel):
 
 class IPTVConnect(BaseModel):
     server_url: str
+    port: int
     username: str
     password: str
     profile_name: Optional[str] = "Default"
     
     @validator('server_url')
     def validate_server_url(cls, v):
+        # Remove port if included
+        v = v.split(':')[0] if ':' in v and not v.startswith('http') else v
         if not v.startswith('http'):
-            raise ValueError('Server URL must start with http:// or https://')
+            v = f'http://{v}'
+        return v.rstrip('/')
+    
+    @validator('port')
+    def validate_port(cls, v):
+        if v < 1 or v > 65535:
+            raise ValueError('Port must be between 1 and 65535')
         return v
 
 class Token(BaseModel):
