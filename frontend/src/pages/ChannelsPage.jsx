@@ -324,6 +324,43 @@ const ChannelsPage = () => {
         </div>
       </div>
 
+      {/* Stream Preview Modal */}
+      {streamPreview && (
+        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4">
+          <Card className="w-full max-w-2xl bg-gray-900 border-cyan-500 p-6">
+            <h2 className="text-white text-2xl font-bold mb-4">{streamPreview.name}</h2>
+            
+            <div className="bg-black border border-gray-700 rounded p-4 mb-6">
+              <p className="text-gray-400 text-xs mb-2">Stream URL:</p>
+              <p className="text-cyan-400 text-sm break-all font-mono">{streamPreview.url}</p>
+            </div>
+
+            <div className="flex gap-4">
+              <Button
+                onClick={() => {
+                  setPlayingStream(streamPreview);
+                  setStreamPreview(null);
+                }}
+                className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-black font-bold"
+              >
+                ▶ Play Stream
+              </Button>
+              <Button
+                onClick={() => setStreamPreview(null)}
+                variant="outline"
+                className="border-gray-600 text-white hover:bg-white/10"
+              >
+                Cancel
+              </Button>
+            </div>
+
+            <p className="text-gray-500 text-xs mt-4 text-center">
+              If playback fails, copy this URL and test in VLC or another player
+            </p>
+          </Card>
+        </div>
+      )}
+
       {/* Video Player */}
       {playingStream && (
         <ErrorBoundary onReset={() => setPlayingStream(null)}>
