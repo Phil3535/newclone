@@ -34,29 +34,43 @@ const ChannelsPage = () => {
   const loadData = async () => {
     setLoading(true);
     
-    // Get active profile
-    const profileId = localStorage.getItem('active_profile_id');
-    if (!profileId) {
+    try {
+      // Get active profile
+      const profileId = localStorage.getItem('active_profile_id');
+      if (!profileId) {
+        toast({
+          title: 'No IPTV Connection',
+          description: 'Please connect your IPTV service first.',
+        });
+        navigate('/app');
+        return;
+      }
+
+      console.log('Loading channels for profile:', profileId);
+      setProfile({ profile_id: profileId });
+
+      // Load categories and channels
+      const [cats, chans] = await Promise.all([
+        iptvService.getCategories(profileId),
+        iptvService.getChannels(profileId)
+      ]);
+
+      console.log('Categories loaded:', cats.length);
+      console.log('Channels loaded:', chans.length);
+
+      setCategories(cats);
+      setChannels(chans);
+      setFilteredChannels(chans);
+    } catch (error) {
+      console.error('Error loading data:', error);
       toast({
-        title: 'No IPTV Connection',
-        description: 'Please connect your IPTV service first.',
+        title: 'Error Loading Channels',
+        description: 'Failed to load channels. Please try reconnecting your IPTV.',
+        variant: 'destructive',
       });
-      navigate('/app');
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    setProfile({ profile_id: profileId });
-
-    // Load categories and channels
-    const [cats, chans] = await Promise.all([
-      iptvService.getCategories(profileId),
-      iptvService.getChannels(profileId)
-    ]);
-
-    setCategories(cats);
-    setChannels(chans);
-    setFilteredChannels(chans);
-    setLoading(false);
   };
 
   useEffect(() => {
