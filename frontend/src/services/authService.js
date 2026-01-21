@@ -29,10 +29,10 @@ class AuthService {
     }
   }
 
-  async register(email, password, fullName) {
+  async register(username, password, fullName) {
     try {
       const response = await axios.post(`${API}/auth/register`, {
-        email,
+        username,
         password,
         full_name: fullName,
       });
@@ -46,10 +46,10 @@ class AuthService {
     }
   }
 
-  async login(email, password) {
+  async login(username, password) {
     try {
       const response = await axios.post(`${API}/auth/login`, {
-        email,
+        username,
         password,
       });
       this.setToken(response.data.access_token);
