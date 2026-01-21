@@ -177,7 +177,7 @@ async def get_profile(current_user: dict = Depends(get_current_user)):
     """Get user profile"""
     return {
         "id": current_user["_id"],
-        "email": current_user["email"],
+        "username": current_user["username"],
         "full_name": current_user.get("full_name"),
         "subscription_status": current_user.get("subscription_status", "trial"),
         "subscription_expires": current_user.get("subscription_expires"),
