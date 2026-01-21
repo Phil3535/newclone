@@ -129,7 +129,17 @@ const ChannelsPage = () => {
   const playChannel = async (channel) => {
     if (!profile) return;
 
+    console.log('Playing channel:', channel.name, 'Stream ID:', channel.stream_id);
+    
+    toast({
+      title: 'Loading Stream',
+      description: `Getting stream URL for ${channel.name}...`,
+    });
+
     const streamUrl = await iptvService.getStreamUrl(profile.profile_id, channel.stream_id);
+    
+    console.log('Stream URL received:', streamUrl);
+    
     if (streamUrl) {
       setPlayingStream({
         url: streamUrl,
@@ -138,7 +148,7 @@ const ChannelsPage = () => {
     } else {
       toast({
         title: 'Stream Error',
-        description: 'Could not load stream URL',
+        description: `Could not load stream URL for ${channel.name}`,
         variant: 'destructive',
       });
     }
