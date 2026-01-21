@@ -138,9 +138,9 @@ def decrypt_credentials(encrypted_data: str) -> str:
 async def register(user_data: UserRegister):
     """Register a new user"""
     # Check if user exists
-    existing_user = await db.users.find_one({"email": user_data.email})
+    existing_user = await db.users.find_one({"username": user_data.username})
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Username already taken")
     
     # Create user
     user_id = str(uuid.uuid4())
@@ -148,7 +148,7 @@ async def register(user_data: UserRegister):
     
     user = {
         "_id": user_id,
-        "email": user_data.email,
+        "username": user_data.username,
         "password": hashed_password,
         "full_name": user_data.full_name,
         "subscription_status": "trial",
@@ -165,9 +165,9 @@ async def register(user_data: UserRegister):
 @api_router.post("/auth/login", response_model=Token)
 async def login(credentials: UserLogin):
     """Login user"""
-    user = await db.users.find_one({"email": credentials.email})
+    user = await db.users.find_one({"username": credentials.username})
     if not user or not pwd_context.verify(credentials.password, user["password"]):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+        raise HTTPException(status_code=401, detail="Invalid username or password")
     
     access_token = create_access_token(data={"sub": user["_id"]})
     return Token(access_token=access_token)
