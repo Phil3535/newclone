@@ -135,37 +135,27 @@ const ChannelsPage = () => {
     }
 
     try {
-      addDebug(`Clicked: ${channel.name}`);
-      alert(`Getting stream for: ${channel.name}...`);
-      
       const streamUrl = await iptvService.getStreamUrl(profile.profile_id, channel.stream_id);
       
-      addDebug(`Stream URL: ${streamUrl || 'NULL'}`);
-      
       if (streamUrl) {
-        alert(`Stream URL:\n${streamUrl}\n\nPress OK to play or Cancel to go back`);
+        // For mobile, just open stream in new tab or use native player
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         
-        // Show preview
-        setStreamPreview({
-          url: streamUrl,
-          name: channel.name,
-        });
+        if (isMobile) {
+          // Open stream directly - iOS will use native player
+          window.location.href = streamUrl;
+        } else {
+          // Desktop - use our player
+          setPlayingStream({
+            url: streamUrl,
+            name: channel.name,
+          });
+        }
       } else {
         alert('ERROR: No stream URL received from server');
-        toast({
-          title: 'Stream Error',
-          description: `Could not load stream URL for ${channel.name}`,
-          variant: 'destructive',
-        });
       }
     } catch (error) {
-      addDebug(`Error: ${error.message}`);
       alert(`ERROR: ${error.message}`);
-      toast({
-        title: 'Playback Failed',
-        description: error.message || 'Failed to start playback',
-        variant: 'destructive',
-      });
     }
   };
 
