@@ -82,13 +82,29 @@ class IPTVService {
 
   async getStreamUrl(profileId, streamId) {
     try {
+      console.log('IPTV Service: Getting stream URL for stream', streamId);
       const response = await axios.get(`${API}/content/stream/${streamId}`, {
         params: { profile_id: profileId },
         headers: authService.getAuthHeader(),
       });
-      return response.data.stream_url;
+      
+      console.log('IPTV Service: Stream response:', response.data);
+      const streamUrl = response.data.stream_url;
+      console.log('IPTV Service: Extracted stream URL:', streamUrl);
+      
+      if (!streamUrl) {
+        console.error('IPTV Service: stream_url is null or undefined!');
+        alert(`DEBUG: Response data: ${JSON.stringify(response.data)}`);
+      }
+      
+      return streamUrl;
     } catch (error) {
-      console.error('Error fetching stream URL:', error);
+      console.error('IPTV Service: Error fetching stream URL', error.response?.status, error.response?.data);
+      alert(`ERROR getting stream: ${error.response?.status} - ${error.response?.data?.detail || error.message}`);
+      if (error.response?.status === 401) {
+        console.error('IPTV Service: Unauthorized - token may have expired');
+        alert('Your session expired. Please login again.');
+      }
       return null;
     }
   }
