@@ -129,26 +129,45 @@ const ChannelsPage = () => {
   const playChannel = async (channel) => {
     if (!profile) return;
 
-    console.log('Playing channel:', channel.name, 'Stream ID:', channel.stream_id);
-    
-    toast({
-      title: 'Loading Stream',
-      description: `Getting stream URL for ${channel.name}...`,
-    });
-
-    const streamUrl = await iptvService.getStreamUrl(profile.profile_id, channel.stream_id);
-    
-    console.log('Stream URL received:', streamUrl);
-    
-    if (streamUrl) {
-      setPlayingStream({
-        url: streamUrl,
-        name: channel.name,
-      });
-    } else {
+    try {
+      console.log('Playing channel:', channel.name, 'Stream ID:', channel.stream_id);
+      
       toast({
-        title: 'Stream Error',
-        description: `Could not load stream URL for ${channel.name}`,
+        title: 'Loading Stream',
+        description: `Getting stream URL for ${channel.name}...`,
+      });
+
+      const streamUrl = await iptvService.getStreamUrl(profile.profile_id, channel.stream_id);
+      
+      console.log('Stream URL received:', streamUrl);
+      
+      if (streamUrl) {
+        // Validate URL format
+        if (!streamUrl.includes('http')) {
+          toast({
+            title: 'Invalid Stream URL',
+            description: 'Stream URL format is incorrect',
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        setPlayingStream({
+          url: streamUrl,
+          name: channel.name,
+        });
+      } else {
+        toast({
+          title: 'Stream Error',
+          description: `Could not load stream URL for ${channel.name}`,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error playing channel:', error);
+      toast({
+        title: 'Playback Failed',
+        description: error.message || 'Failed to start playback',
         variant: 'destructive',
       });
     }
