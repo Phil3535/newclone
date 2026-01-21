@@ -129,22 +129,29 @@ const ChannelsPage = () => {
   }, [searchQuery, selectedCategory, channels]);
 
   const playChannel = async (channel) => {
-    if (!profile) return;
+    if (!profile) {
+      alert('No profile found');
+      return;
+    }
 
     try {
       addDebug(`Clicked: ${channel.name}`);
+      alert(`Getting stream for: ${channel.name}...`);
       
       const streamUrl = await iptvService.getStreamUrl(profile.profile_id, channel.stream_id);
       
-      addDebug(`Stream URL: ${streamUrl ? 'Received' : 'NULL'}`);
+      addDebug(`Stream URL: ${streamUrl || 'NULL'}`);
       
       if (streamUrl) {
-        // Show preview first instead of playing directly
+        alert(`Stream URL:\n${streamUrl}\n\nPress OK to play or Cancel to go back`);
+        
+        // Show preview
         setStreamPreview({
           url: streamUrl,
           name: channel.name,
         });
       } else {
+        alert('ERROR: No stream URL received from server');
         toast({
           title: 'Stream Error',
           description: `Could not load stream URL for ${channel.name}`,
@@ -153,6 +160,7 @@ const ChannelsPage = () => {
       }
     } catch (error) {
       addDebug(`Error: ${error.message}`);
+      alert(`ERROR: ${error.message}`);
       toast({
         title: 'Playback Failed',
         description: error.message || 'Failed to start playback',
