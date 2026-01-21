@@ -41,6 +41,7 @@ class IPTVService {
 
   async getChannels(profileId, categoryId = null) {
     try {
+      console.log('IPTV Service: Fetching channels for profile', profileId);
       const params = { profile_id: profileId };
       if (categoryId) params.category_id = categoryId;
 
@@ -48,22 +49,33 @@ class IPTVService {
         params,
         headers: authService.getAuthHeader(),
       });
+      
+      console.log('IPTV Service: Channels response', response.data);
       return response.data.channels || [];
     } catch (error) {
-      console.error('Error fetching channels:', error);
+      console.error('IPTV Service: Error fetching channels', error.response?.status, error.response?.data);
+      if (error.response?.status === 401) {
+        console.error('IPTV Service: Unauthorized - token may have expired');
+      }
       return [];
     }
   }
 
   async getCategories(profileId) {
     try {
+      console.log('IPTV Service: Fetching categories for profile', profileId);
       const response = await axios.get(`${API}/content/categories`, {
         params: { profile_id: profileId },
         headers: authService.getAuthHeader(),
       });
+      
+      console.log('IPTV Service: Categories response', response.data);
       return response.data.categories || [];
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('IPTV Service: Error fetching categories', error.response?.status, error.response?.data);
+      if (error.response?.status === 401) {
+        console.error('IPTV Service: Unauthorized - token may have expired');
+      }
       return [];
     }
   }
