@@ -32,73 +32,37 @@ const ChannelsPage = () => {
   }, []);
 
   const loadData = async () => {
-    addDebug('Starting to load data...');
     setLoading(true);
     
     try {
-      // Check authentication
       const isAuth = authService.isAuthenticated();
-      addDebug(`Authentication check: ${isAuth ? 'PASSED' : 'FAILED'}`);
       
       if (!isAuth) {
-        addDebug('STOP: Not authenticated. Please login again.');
-        setLoading(false);
-        // Don't auto-redirect, let user see the debug info
-        toast({
-          title: 'Session Expired',
-          description: 'Please login again.',
-          variant: 'destructive',
-        });
+        navigate('/login');
         return;
       }
 
-      // Get active profile
       const profileId = localStorage.getItem('active_profile_id');
-      addDebug(`Profile ID: ${profileId || 'NOT FOUND'}`);
       
       if (!profileId) {
-        addDebug('STOP: No IPTV profile connected');
-        setLoading(false);
-        toast({
-          title: 'No IPTV Connection',
-          description: 'Go back to dashboard and connect IPTV.',
-        });
+        navigate('/app');
         return;
       }
 
       setProfile({ profile_id: profileId });
-      addDebug('Requesting channels from API...');
 
-      // Load categories and channels
       const [cats, chans] = await Promise.all([
         iptvService.getCategories(profileId),
         iptvService.getChannels(profileId)
       ]);
 
-      addDebug(`Categories received: ${cats.length}`);
-      addDebug(`Channels received: ${chans.length}`);
-
       setCategories(cats);
       setChannels(chans);
       setFilteredChannels(chans);
-      
-      if (chans.length === 0) {
-        addDebug('⚠️ WARNING: Your IPTV returned 0 channels!');
-        addDebug('Check your IPTV server credentials');
-      } else {
-        addDebug(`✓ SUCCESS: ${chans.length} channels loaded`);
-      }
     } catch (error) {
-      addDebug(`❌ ERROR: ${error.message}`);
-      addDebug(`Error details: ${error.toString()}`);
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
-      addDebug('--- Loading finished ---');
     }
   };
 
