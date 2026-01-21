@@ -130,18 +130,19 @@ const ChannelsPage = () => {
   const playChannel = async (channel) => {
     if (!profile) return;
 
-    try {
-      const streamUrl = await iptvService.getStreamUrl(profile.profile_id, channel.stream_id);
-      
-      if (streamUrl) {
-        // Simple approach - use native video element
-        setPlayingStream({
-          url: streamUrl,
-          name: channel.name,
-        });
-      }
-    } catch (error) {
-      alert(`ERROR: ${error.message}`);
+    const streamUrl = await iptvService.getStreamUrl(profile.profile_id, channel.stream_id);
+    
+    if (streamUrl) {
+      setPlayingStream({
+        url: streamUrl,
+        name: channel.name,
+      });
+    } else {
+      toast({
+        title: 'Stream Error',
+        description: 'Could not load stream',
+        variant: 'destructive',
+      });
     }
   };
 
