@@ -118,28 +118,6 @@ const ChannelsPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A0E27] via-[#1A1F3A] to-[#0A0E27]">
-      {/* Debug Panel */}
-      {showDebug && debugInfo.length > 0 && (
-        <div className="fixed top-20 right-4 z-50 bg-black/90 border border-cyan-500 rounded-lg p-4 max-w-md max-h-96 overflow-y-auto">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-cyan-400 font-bold text-sm">Debug Info</h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowDebug(false)}
-              className="text-gray-400 hover:text-white h-6 w-6 p-0"
-            >
-              ✕
-            </Button>
-          </div>
-          <div className="space-y-1">
-            {debugInfo.map((info, i) => (
-              <p key={i} className="text-xs text-gray-300 font-mono">{info}</p>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Header */}
       <div className="bg-black/50 backdrop-blur-sm border-b border-cyan-500/20 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
