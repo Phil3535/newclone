@@ -5,12 +5,13 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 class IPTVService {
-  async connectIPTV(serverUrl, username, password, profileName = 'Default') {
+  async connectIPTV(serverUrl, port, username, password, profileName = 'Default') {
     try {
       const response = await axios.post(
         `${API}/iptv/connect`,
         {
           server_url: serverUrl,
+          port: parseInt(port),
           username,
           password,
           profile_name: profileName,
