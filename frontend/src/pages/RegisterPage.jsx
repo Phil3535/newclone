@@ -7,7 +7,7 @@ import { useToast } from '../hooks/use-toast';
 import authService from '../services/authService';
 
 const RegisterPage = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ const RegisterPage = () => {
     e.preventDefault();
     setLoading(true);
 
-    const result = await authService.register(email, password, fullName);
+    const result = await authService.register(username, password, fullName);
 
     if (result.success) {
       toast({
@@ -61,14 +61,14 @@ const RegisterPage = () => {
           </div>
 
           <div>
-            <label className="text-white text-sm mb-2 block">Email</label>
+            <label className="text-white text-sm mb-2 block">Username</label>
             <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               className="bg-gray-800 border-gray-700 text-white"
-              placeholder="your@email.com"
+              placeholder="your_username"
             />
           </div>
 
