@@ -19,8 +19,14 @@ const ChannelsPage = () => {
   const [loading, setLoading] = useState(true);
   const [playingStream, setPlayingStream] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [debugInfo, setDebugInfo] = useState([]);
+  const [showDebug, setShowDebug] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const addDebug = (message) => {
+    setDebugInfo(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+  };
 
   useEffect(() => {
     if (!authService.isAuthenticated()) {
