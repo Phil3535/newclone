@@ -47,8 +47,14 @@ const ChannelsPage = () => {
       addDebug(`Authentication check: ${isAuth ? 'PASSED' : 'FAILED'}`);
       
       if (!isAuth) {
-        addDebug('Redirecting to login (not authenticated)');
-        navigate('/login');
+        addDebug('STOP: Not authenticated. Please login again.');
+        setLoading(false);
+        // Don't auto-redirect, let user see the debug info
+        toast({
+          title: 'Session Expired',
+          description: 'Please login again.',
+          variant: 'destructive',
+        });
         return;
       }
 
@@ -57,17 +63,17 @@ const ChannelsPage = () => {
       addDebug(`Profile ID: ${profileId || 'NOT FOUND'}`);
       
       if (!profileId) {
-        addDebug('No profile ID - redirecting to dashboard');
+        addDebug('STOP: No IPTV profile connected');
+        setLoading(false);
         toast({
           title: 'No IPTV Connection',
-          description: 'Please connect your IPTV service first.',
+          description: 'Go back to dashboard and connect IPTV.',
         });
-        navigate('/app');
         return;
       }
 
       setProfile({ profile_id: profileId });
-      addDebug('Requesting channels from server...');
+      addDebug('Requesting channels from API...');
 
       // Load categories and channels
       const [cats, chans] = await Promise.all([
@@ -75,28 +81,30 @@ const ChannelsPage = () => {
         iptvService.getChannels(profileId)
       ]);
 
-      addDebug(`Categories loaded: ${cats.length}`);
-      addDebug(`Channels loaded: ${chans.length}`);
+      addDebug(`Categories received: ${cats.length}`);
+      addDebug(`Channels received: ${chans.length}`);
 
       setCategories(cats);
       setChannels(chans);
       setFilteredChannels(chans);
       
       if (chans.length === 0) {
-        addDebug('WARNING: No channels returned from IPTV server!');
+        addDebug('⚠️ WARNING: Your IPTV returned 0 channels!');
+        addDebug('Check your IPTV server credentials');
       } else {
-        addDebug(`SUCCESS: ${chans.length} channels ready to watch`);
+        addDebug(`✓ SUCCESS: ${chans.length} channels loaded`);
       }
     } catch (error) {
-      addDebug(`ERROR: ${error.message}`);
+      addDebug(`❌ ERROR: ${error.message}`);
+      addDebug(`Error details: ${error.toString()}`);
       toast({
-        title: 'Error Loading Channels',
-        description: error.message || 'Failed to load channels.',
+        title: 'Error',
+        description: error.message,
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
-      addDebug('Loading complete');
+      addDebug('--- Loading finished ---');
     }
   };
 
