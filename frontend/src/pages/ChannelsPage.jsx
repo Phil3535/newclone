@@ -5,6 +5,7 @@ import { Input } from '../components/ui/input';
 import { Card } from '../components/ui/card';
 import { Search, Play, Grid, List, LogOut } from 'lucide-react';
 import HLSPlayer from '../components/HLSPlayer';
+import ErrorBoundary from '../components/ErrorBoundary';
 import iptvService from '../services/iptvService';
 import authService from '../services/authService';
 import { useToast } from '../hooks/use-toast';
