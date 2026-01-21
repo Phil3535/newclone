@@ -339,11 +339,13 @@ const ChannelsPage = () => {
 
       {/* Video Player */}
       {playingStream && (
-        <HLSPlayer
-          streamUrl={playingStream.url}
-          channelName={playingStream.name}
-          onClose={() => setPlayingStream(null)}
-        />
+        <ErrorBoundary onReset={() => setPlayingStream(null)}>
+          <HLSPlayer
+            streamUrl={playingStream.url}
+            channelName={playingStream.name}
+            onClose={() => setPlayingStream(null)}
+          />
+        </ErrorBoundary>
       )}
 
       {/* Show stream URL for debugging */}
