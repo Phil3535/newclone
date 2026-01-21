@@ -129,30 +129,17 @@ const ChannelsPage = () => {
   }, [searchQuery, selectedCategory, channels]);
 
   const playChannel = async (channel) => {
-    if (!profile) {
-      alert('No profile found');
-      return;
-    }
+    if (!profile) return;
 
     try {
       const streamUrl = await iptvService.getStreamUrl(profile.profile_id, channel.stream_id);
       
       if (streamUrl) {
-        // For mobile, just open stream in new tab or use native player
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        
-        if (isMobile) {
-          // Open stream directly - iOS will use native player
-          window.location.href = streamUrl;
-        } else {
-          // Desktop - use our player
-          setPlayingStream({
-            url: streamUrl,
-            name: channel.name,
-          });
-        }
-      } else {
-        alert('ERROR: No stream URL received from server');
+        // Simple approach - use native video element
+        setPlayingStream({
+          url: streamUrl,
+          name: channel.name,
+        });
       }
     } catch (error) {
       alert(`ERROR: ${error.message}`);
