@@ -332,10 +332,17 @@ export default function LegalAgreementScreen({ onAccept, isReaccept = false }: L
         agreements: Object.keys(agreements),
         version: '1.0',
       };
-      await AsyncStorage.setItem('legal_agreements_accepted', JSON.stringify(acceptanceData));
       
-      // Also send to backend for record keeping
-      await fetch(`${API_URL}/api/legal/accept`, {
+      // Try to save to AsyncStorage, but don't block on failure
+      try {
+        await AsyncStorage.setItem('legal_agreements_accepted', JSON.stringify(acceptanceData));
+      } catch (storageError) {
+        console.warn('Failed to save to AsyncStorage:', storageError);
+        // Continue anyway - the app should still work
+      }
+      
+      // Also send to backend for record keeping (non-blocking)
+      fetch(`${API_URL}/api/legal/accept`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -344,9 +351,12 @@ export default function LegalAgreementScreen({ onAccept, isReaccept = false }: L
         }),
       }).catch(() => {}); // Silent fail - local storage is primary
       
+      // ALWAYS call onAccept to navigate away from this screen
       onAccept();
     } catch (error) {
-      console.error('Error saving agreement acceptance:', error);
+      console.error('Error in handleAccept:', error);
+      // Even on error, still try to proceed
+      onAccept();
     } finally {
       setSubmitting(false);
     }
