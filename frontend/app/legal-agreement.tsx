@@ -376,9 +376,13 @@ export default function LegalAgreementScreen({ onAccept, isReaccept = false }: L
       ]}
     >
       {/* Background Image - for native only */}
-      {Platform.OS !== 'web' && (
+      {Platform.OS !== 'web' && !imageError && (
         <Image 
           source={{ uri: BACKGROUND_IMAGE_URL }}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+          onError={() => setImageError(true)}
+        />
           style={styles.backgroundImage}
           resizeMode="cover"
         />
