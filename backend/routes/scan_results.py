@@ -77,7 +77,7 @@ async def create_scan_result(scan: ScanResult):
     await db.scan_results.insert_one(result_doc)
     
     # Generate share URL (will be handled by frontend routing)
-    base_url = os.environ.get('FRONTEND_URL', 'https://elite-solar-rep.preview.emergentagent.com')
+    base_url = os.environ.get('FRONTEND_URL', 'https://empire-sales-suite.preview.emergentagent.com')
     share_url = f"{base_url}/solar-estimate/{scan_id}"
     
     return {
@@ -134,7 +134,7 @@ async def send_sms_followup(scan_id: str, request: SMSFollowUpRequest):
     savings_25yr = result.get('twenty_five_year_savings', savings * 25)
     rep_name = result.get('rep_name', 'Your Solar Consultant')
     
-    base_url = os.environ.get('FRONTEND_URL', 'https://elite-solar-rep.preview.emergentagent.com')
+    base_url = os.environ.get('FRONTEND_URL', 'https://empire-sales-suite.preview.emergentagent.com')
     share_url = f"{base_url}/solar-estimate/{scan_id}"
     
     greeting = f"Hi {request.name}! " if request.name else ""

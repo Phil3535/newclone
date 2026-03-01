@@ -7,7 +7,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://elite-solar-rep.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://empire-sales-suite.preview.emergentagent.com')
 
 class TestSubscriptionEndpoints:
     """Test subscription-related endpoints"""
@@ -78,7 +78,7 @@ class TestSubscriptionEndpoints:
         test_user_id = "301b2e32-f221-48df-a8c1-bfae3a76c4c6"
         payload = {
             "plan_id": "pro",
-            "origin_url": "https://elite-solar-rep.preview.emergentagent.com",
+            "origin_url": "https://empire-sales-suite.preview.emergentagent.com",
             "user_id": test_user_id
         }
         
@@ -102,7 +102,7 @@ class TestSubscriptionEndpoints:
         test_user_id = "301b2e32-f221-48df-a8c1-bfae3a76c4c6"
         payload = {
             "plan_id": "enterprise",
-            "origin_url": "https://elite-solar-rep.preview.emergentagent.com",
+            "origin_url": "https://empire-sales-suite.preview.emergentagent.com",
             "user_id": test_user_id
         }
         
@@ -125,7 +125,7 @@ class TestSubscriptionEndpoints:
         test_user_id = "test-free-user-" + "123456"
         payload = {
             "plan_id": "free",
-            "origin_url": "https://elite-solar-rep.preview.emergentagent.com",
+            "origin_url": "https://empire-sales-suite.preview.emergentagent.com",
             "user_id": test_user_id
         }
         
@@ -147,7 +147,7 @@ class TestSubscriptionEndpoints:
         """POST /api/subscriptions/checkout - Invalid plan should return 400"""
         payload = {
             "plan_id": "invalid_plan",
-            "origin_url": "https://elite-solar-rep.preview.emergentagent.com",
+            "origin_url": "https://empire-sales-suite.preview.emergentagent.com",
             "user_id": "test-user"
         }
         

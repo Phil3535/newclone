@@ -14,7 +14,7 @@ import os
 import time
 
 # Use the production URL from environment
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://elite-solar-rep.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://empire-sales-suite.preview.emergentagent.com').rstrip('/')
 
 
 class TestEmailConfiguration:
