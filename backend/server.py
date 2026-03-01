@@ -4156,6 +4156,7 @@ app.include_router(admin_router)  # Admin Dashboard API
 app.include_router(admin_auth_router)  # Admin Authentication & RBAC
 app.include_router(two_factor_auth_router)  # Two-Factor Authentication
 app.include_router(organizations_router)  # Multi-tenancy & White-label
+app.include_router(advanced_features_router)  # Phase 1-4: Advanced patentable features
 
 app.add_middleware(
     CORSMiddleware,
