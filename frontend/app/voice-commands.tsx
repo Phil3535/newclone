@@ -416,6 +416,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  historyButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#1e3a5f',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   title: {
     fontSize: 20,
     fontWeight: '700',
@@ -426,6 +434,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#94a3b8',
     textAlign: 'center',
+  },
+  scrollContent: {
+    flex: 1,
   },
   content: {
     flex: 1,
@@ -502,10 +513,37 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: 14,
     color: '#64748b',
-    marginBottom: 40,
+    marginBottom: 24,
+  },
+  historySection: {
+    width: '100%',
+    marginBottom: 24,
+  },
+  historyItem: {
+    backgroundColor: '#0f1a2e',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#1e3a5f',
+  },
+  historyCommand: {
+    fontSize: 14,
+    color: '#f59e0b',
+    marginBottom: 4,
+  },
+  historyResponse: {
+    fontSize: 13,
+    color: '#94a3b8',
+    marginBottom: 4,
+  },
+  historyTime: {
+    fontSize: 11,
+    color: '#64748b',
   },
   commandsSection: {
     width: '100%',
+    paddingBottom: 40,
   },
   sectionTitle: {
     fontSize: 14,
