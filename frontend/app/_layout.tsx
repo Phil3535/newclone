@@ -203,7 +203,15 @@ function RootLayoutContent() {
 
   // Show legal agreement if not accepted or re-acceptance needed (unless dev bypass is enabled)
   if (showLegalAgreement && !DEV_SKIP_LEGAL) {
-    return <LegalAgreementScreen onAccept={handleLegalAccept} isReaccept={isReaccept} />;
+    return (
+      <ErrorBoundary onRetry={() => {
+        setShowLegalAgreement(false);
+        setCheckingLegal(true);
+        checkLegalAcceptance();
+      }}>
+        <LegalAgreementScreen onAccept={handleLegalAccept} isReaccept={isReaccept} />
+      </ErrorBoundary>
+    );
   }
 
   return (
