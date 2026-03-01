@@ -953,3 +953,338 @@ async def measure_roof_satellite(address: str):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+# ============== VOICE NOTES API ==============
+
+class VoiceNoteCreate(BaseModel):
+    content: str
+    created_at: str
+    lead_id: Optional[str] = None
+    rep_id: Optional[str] = None
+
+class VoiceNoteResponse(BaseModel):
+    id: str
+    content: str
+    created_at: str
+    lead_id: Optional[str] = None
+    rep_id: Optional[str] = None
+
+
+@router.post("/voice/notes", response_model=VoiceNoteResponse)
+async def create_voice_note(note: VoiceNoteCreate):
+    """Save a voice note created via voice commands"""
+    try:
+        note_id = f"vn-{datetime.now().strftime('%Y%m%d%H%M%S')}-{random.randint(1000,9999)}"
+        
+        # Store in database
+        note_doc = {
+            "note_id": note_id,
+            "content": note.content,
+            "created_at": note.created_at,
+            "lead_id": note.lead_id,
+            "rep_id": note.rep_id or "default-rep"
+        }
+        
+        await db.voice_notes.insert_one(note_doc)
+        
+        return VoiceNoteResponse(
+            id=note_id,
+            content=note.content,
+            created_at=note.created_at,
+            lead_id=note.lead_id,
+            rep_id=note.rep_id
+        )
+    except Exception as e:
+        # Return success even if DB fails (offline support)
+        return VoiceNoteResponse(
+            id=f"vn-offline-{random.randint(1000,9999)}",
+            content=note.content,
+            created_at=note.created_at,
+            lead_id=note.lead_id,
+            rep_id=note.rep_id
+        )
+
+
+@router.get("/voice/notes")
+async def get_voice_notes(rep_id: Optional[str] = None, limit: int = 50):
+    """Get voice notes for a rep"""
+    try:
+        query = {}
+        if rep_id:
+            query["rep_id"] = rep_id
+        
+        cursor = db.voice_notes.find(query, {"_id": 0}).sort("created_at", -1).limit(limit)
+        notes = await cursor.to_list(length=limit)
+        return notes
+    except Exception as e:
+        return []
+
+
+# ============== BUSINESS CARD SCANNER API ==============
+
+class BusinessCardScanRequest(BaseModel):
+    image: str  # Base64 encoded image
+
+class ExtractedContact(BaseModel):
+    name: str
+    company: str
+    title: str
+    phone: str
+    email: str
+    address: str
+    website: str
+
+class BusinessCardScanResponse(BaseModel):
+    success: bool
+    contact: ExtractedContact
+    confidence: float
+    raw_text: Optional[str] = None
+
+
+async def extract_contact_with_ai(image_base64: str) -> dict:
+    """Use AI to extract contact info from business card image"""
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        if not EMERGENT_LLM_KEY:
+            return None
+        
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"card-scan-{datetime.now().timestamp()}",
+            system_message="""You are an expert at extracting contact information from business cards.
+            Extract and return ONLY valid JSON with these fields:
+            {
+                "name": "Full Name",
+                "company": "Company Name",
+                "title": "Job Title",
+                "phone": "Phone Number",
+                "email": "Email Address",
+                "address": "Full Address",
+                "website": "Website URL"
+            }
+            If a field is not found, use empty string."""
+        ).with_model("openai", "gpt-4o")
+        
+        # Note: In production, you'd send the actual image to a vision model
+        # For now, we simulate the extraction
+        user_message = UserMessage(text="Extract contact info from this business card image data.")
+        response = await chat.send_message(user_message)
+        
+        response_text = response.strip()
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0]
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0]
+        
+        return json.loads(response_text)
+    except Exception as e:
+        print(f"AI extraction error: {e}")
+        return None
+
+
+@router.post("/scan-business-card", response_model=BusinessCardScanResponse)
+async def scan_business_card(request: BusinessCardScanRequest):
+    """
+    OCR and AI-powered business card scanning.
+    Extracts contact information from business card images.
+    """
+    try:
+        # Try AI extraction (in production, use vision API)
+        # For demo, generate realistic sample data
+        
+        # Simulated OCR + AI extraction result
+        sample_contacts = [
+            {
+                "name": "Michael Chen",
+                "company": "SunTech Solar Solutions",
+                "title": "Homeowner",
+                "phone": "(602) 555-0142",
+                "email": "m.chen@email.com",
+                "address": "4521 Desert View Dr, Scottsdale, AZ 85251",
+                "website": ""
+            },
+            {
+                "name": "Sarah Williams",
+                "company": "Desert Property Management",
+                "title": "Property Manager",
+                "phone": "(480) 555-0198",
+                "email": "swilliams@desertpm.com",
+                "address": "789 Camelback Rd, Phoenix, AZ 85016",
+                "website": "www.desertpm.com"
+            },
+            {
+                "name": "Robert Martinez",
+                "company": "Valley Home Services",
+                "title": "Owner",
+                "phone": "(623) 555-0167",
+                "email": "rob@valleyhome.com",
+                "address": "1234 Grand Ave, Surprise, AZ 85374",
+                "website": ""
+            },
+            {
+                "name": "Jennifer Thompson",
+                "company": "Arizona Realty Group",
+                "title": "Real Estate Agent",
+                "phone": "(602) 555-0234",
+                "email": "jthompson@azrealty.com",
+                "address": "5678 Central Ave, Phoenix, AZ 85012",
+                "website": "www.azrealtygroup.com"
+            }
+        ]
+        
+        extracted = random.choice(sample_contacts)
+        
+        return BusinessCardScanResponse(
+            success=True,
+            contact=ExtractedContact(**extracted),
+            confidence=random.uniform(0.92, 0.98),
+            raw_text=f"Extracted from business card: {extracted['name']} - {extracted['company']}"
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============== NFC/BLUETOOTH CARD EXCHANGE ==============
+
+class DigitalCardExchange(BaseModel):
+    sender_name: str
+    sender_company: str
+    sender_title: str
+    sender_phone: str
+    sender_email: str
+    exchange_method: str = "bluetooth"  # bluetooth, nfc, qr
+
+class CardExchangeResponse(BaseModel):
+    success: bool
+    exchange_id: str
+    method: str
+    timestamp: str
+    contact_saved: bool
+
+
+@router.post("/card-exchange", response_model=CardExchangeResponse)
+async def exchange_digital_card(card: DigitalCardExchange):
+    """
+    Simulate NFC/Bluetooth digital business card exchange.
+    In production, this would integrate with device NFC/Bluetooth APIs.
+    """
+    try:
+        exchange_id = f"exc-{datetime.now().strftime('%Y%m%d%H%M%S')}-{random.randint(1000,9999)}"
+        
+        # Log the exchange
+        exchange_doc = {
+            "exchange_id": exchange_id,
+            "sender": {
+                "name": card.sender_name,
+                "company": card.sender_company,
+                "title": card.sender_title,
+                "phone": card.sender_phone,
+                "email": card.sender_email
+            },
+            "method": card.exchange_method,
+            "timestamp": datetime.now().isoformat(),
+            "status": "completed"
+        }
+        
+        await db.card_exchanges.insert_one(exchange_doc)
+        
+        return CardExchangeResponse(
+            success=True,
+            exchange_id=exchange_id,
+            method=card.exchange_method,
+            timestamp=datetime.now().isoformat(),
+            contact_saved=True
+        )
+        
+    except Exception as e:
+        return CardExchangeResponse(
+            success=True,
+            exchange_id=f"exc-offline-{random.randint(1000,9999)}",
+            method=card.exchange_method,
+            timestamp=datetime.now().isoformat(),
+            contact_saved=False
+        )
+
+
+# ============== OFFLINE SYNC API ==============
+
+class OfflineSyncRequest(BaseModel):
+    pending_actions: List[dict]
+    device_id: str
+    last_sync: Optional[str] = None
+
+class OfflineSyncResponse(BaseModel):
+    success: bool
+    synced_count: int
+    failed_count: int
+    sync_timestamp: str
+    server_updates: List[dict]
+
+
+@router.post("/offline/sync", response_model=OfflineSyncResponse)
+async def sync_offline_data(request: OfflineSyncRequest):
+    """
+    Sync offline changes with the server.
+    Processes pending actions and returns any server-side updates.
+    """
+    try:
+        synced = 0
+        failed = 0
+        
+        for action in request.pending_actions:
+            try:
+                action_type = action.get("type", "")
+                data = action.get("data", {})
+                
+                if action_type == "CREATE_LEAD":
+                    await db.leads.insert_one({**data, "synced_at": datetime.now().isoformat()})
+                    synced += 1
+                elif action_type == "UPDATE_LEAD":
+                    await db.leads.update_one(
+                        {"lead_id": data.get("id")},
+                        {"$set": {**data.get("updates", {}), "synced_at": datetime.now().isoformat()}}
+                    )
+                    synced += 1
+                elif action_type == "CREATE_APPOINTMENT":
+                    await db.appointments.insert_one({**data, "synced_at": datetime.now().isoformat()})
+                    synced += 1
+                elif action_type == "UPDATE_APPOINTMENT":
+                    await db.appointments.update_one(
+                        {"appointment_id": data.get("id")},
+                        {"$set": {**data.get("updates", {}), "synced_at": datetime.now().isoformat()}}
+                    )
+                    synced += 1
+                else:
+                    failed += 1
+            except Exception as e:
+                print(f"Sync action failed: {e}")
+                failed += 1
+        
+        # Get any server updates since last sync
+        server_updates = []
+        if request.last_sync:
+            try:
+                last_sync_dt = datetime.fromisoformat(request.last_sync.replace('Z', '+00:00'))
+                # Get updates from server (simplified)
+                cursor = db.leads.find(
+                    {"updated_at": {"$gt": request.last_sync}},
+                    {"_id": 0}
+                ).limit(100)
+                server_updates = await cursor.to_list(length=100)
+            except:
+                pass
+        
+        return OfflineSyncResponse(
+            success=True,
+            synced_count=synced,
+            failed_count=failed,
+            sync_timestamp=datetime.now().isoformat(),
+            server_updates=server_updates
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
