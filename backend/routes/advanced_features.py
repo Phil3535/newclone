@@ -125,67 +125,175 @@ class CreditCheckResponse(BaseModel):
 
 # ============== AI VOICE PITCH ANALYZER ==============
 
+async def ai_analyze_transcript(transcript: str, call_type: str) -> dict:
+    """Use AI to deeply analyze a sales call transcript"""
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        if not EMERGENT_LLM_KEY:
+            return None
+        
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"voice-analysis-{datetime.now().timestamp()}",
+            system_message="""You are an expert sales coach specializing in solar energy sales. 
+            Analyze the provided call transcript and provide detailed coaching feedback.
+            
+            Respond ONLY in this exact JSON format:
+            {
+                "overall_score": 85,
+                "tone_analysis": {
+                    "warmth": 80,
+                    "authority": 75,
+                    "enthusiasm": 85,
+                    "empathy": 70,
+                    "professionalism": 90
+                },
+                "pace_analysis": {
+                    "words_per_minute": 145,
+                    "pauses_used_effectively": true,
+                    "rushed_sections": 1,
+                    "recommendation": "specific pace recommendation"
+                },
+                "confidence_score": 82,
+                "improvements": ["improvement 1", "improvement 2", "improvement 3"],
+                "strengths": ["strength 1", "strength 2", "strength 3"],
+                "coaching_tips": ["tip 1", "tip 2", "tip 3", "tip 4"]
+            }
+            
+            Score each metric from 0-100. Be specific and actionable in your feedback.
+            Focus on solar sales best practices."""
+        ).with_model("openai", "gpt-4o")
+        
+        prompt = f"""Analyze this {call_type} solar sales call transcript:
+
+---
+{transcript}
+---
+
+Provide detailed analysis focusing on:
+1. Overall effectiveness (0-100)
+2. Tone quality (warmth, authority, enthusiasm, empathy, professionalism)
+3. Pacing and delivery
+4. Specific improvements needed
+5. Strengths to reinforce
+6. Actionable coaching tips for next calls"""
+
+        user_message = UserMessage(text=prompt)
+        response = await chat.send_message(user_message)
+        
+        # Parse JSON response
+        response_text = response.strip()
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0]
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0]
+        
+        return json.loads(response_text)
+    except Exception as e:
+        print(f"AI analysis error: {e}")
+        return None
+
+
 @router.post("/voice-analyzer", response_model=VoiceAnalysisResponse)
 async def analyze_voice_pitch(request: VoiceAnalysisRequest):
     """
     AI-powered voice analysis for sales calls.
-    Analyzes tone, pace, energy, and provides coaching tips.
+    Analyzes tone, pace, energy, and provides coaching tips using GPT-4.
     """
     try:
-        # Simulate AI analysis (in production, integrate with speech-to-text + LLM)
-        if request.transcript:
-            # Analyze transcript for keywords and patterns
-            transcript_lower = request.transcript.lower()
-            
-            # Check for positive indicators
-            positive_words = ["absolutely", "definitely", "great", "excellent", "perfect", "savings", "investment", "value"]
-            negative_words = ["um", "uh", "maybe", "i think", "not sure", "possibly"]
-            
-            positive_count = sum(1 for word in positive_words if word in transcript_lower)
-            negative_count = sum(1 for word in negative_words if word in transcript_lower)
-            
-            confidence_score = min(100, max(40, 70 + (positive_count * 5) - (negative_count * 8)))
-            overall_score = min(100, max(50, 75 + (positive_count * 3) - (negative_count * 5)))
-        else:
-            confidence_score = random.randint(65, 85)
-            overall_score = random.randint(70, 90)
+        # Try AI analysis first if transcript is provided
+        ai_result = None
+        if request.transcript and EMERGENT_LLM_KEY:
+            ai_result = await ai_analyze_transcript(request.transcript, request.call_type)
         
-        # Generate analysis
-        analysis = VoiceAnalysisResponse(
-            overall_score=overall_score,
-            tone_analysis={
-                "warmth": random.randint(70, 95),
-                "authority": random.randint(65, 90),
-                "enthusiasm": random.randint(60, 95),
-                "empathy": random.randint(70, 90),
-                "professionalism": random.randint(75, 95)
-            },
-            pace_analysis={
-                "words_per_minute": random.randint(120, 160),
-                "optimal_range": "130-150 WPM",
-                "pauses_used_effectively": random.choice([True, False]),
-                "rushed_sections": random.randint(0, 3),
-                "recommendation": "Slow down slightly during pricing discussion"
-            },
-            energy_level="High" if overall_score > 80 else "Medium" if overall_score > 65 else "Low",
-            confidence_score=confidence_score,
-            improvements=[
-                "Use more specific numbers when discussing savings",
-                "Add a brief pause after stating the price to let it sink in",
-                "Ask more open-ended questions to understand customer needs"
-            ],
-            strengths=[
-                "Excellent rapport building in the opening",
-                "Clear explanation of the installation process",
-                "Good handling of the financing question"
-            ],
-            coaching_tips=[
-                "Try the 'feel, felt, found' technique for objections",
-                "Mirror the customer's energy level for better connection",
-                "Use the customer's name 3-5 times during the call",
-                "End with a clear next step and timeline"
-            ]
-        )
+        if ai_result:
+            # Use AI-generated analysis
+            overall_score = ai_result.get("overall_score", 75)
+            confidence_score = ai_result.get("confidence_score", 70)
+            
+            analysis = VoiceAnalysisResponse(
+                overall_score=overall_score,
+                tone_analysis=ai_result.get("tone_analysis", {
+                    "warmth": 75, "authority": 75, "enthusiasm": 75,
+                    "empathy": 75, "professionalism": 80
+                }),
+                pace_analysis={
+                    "words_per_minute": ai_result.get("pace_analysis", {}).get("words_per_minute", 140),
+                    "optimal_range": "130-150 WPM",
+                    "pauses_used_effectively": ai_result.get("pace_analysis", {}).get("pauses_used_effectively", True),
+                    "rushed_sections": ai_result.get("pace_analysis", {}).get("rushed_sections", 0),
+                    "recommendation": ai_result.get("pace_analysis", {}).get("recommendation", "Maintain current pace")
+                },
+                energy_level="High" if overall_score > 80 else "Medium" if overall_score > 65 else "Low",
+                confidence_score=confidence_score,
+                improvements=ai_result.get("improvements", [
+                    "Continue practicing objection handling",
+                    "Add more specific savings examples",
+                    "Ask more discovery questions"
+                ]),
+                strengths=ai_result.get("strengths", [
+                    "Good rapport building",
+                    "Clear communication",
+                    "Professional demeanor"
+                ]),
+                coaching_tips=ai_result.get("coaching_tips", [
+                    "Use customer's name more frequently",
+                    "Mirror customer's energy level",
+                    "End with clear next steps"
+                ])
+            )
+        else:
+            # Fallback to rule-based analysis
+            if request.transcript:
+                transcript_lower = request.transcript.lower()
+                positive_words = ["absolutely", "definitely", "great", "excellent", "perfect", "savings", "investment", "value"]
+                negative_words = ["um", "uh", "maybe", "i think", "not sure", "possibly"]
+                
+                positive_count = sum(1 for word in positive_words if word in transcript_lower)
+                negative_count = sum(1 for word in negative_words if word in transcript_lower)
+                
+                confidence_score = min(100, max(40, 70 + (positive_count * 5) - (negative_count * 8)))
+                overall_score = min(100, max(50, 75 + (positive_count * 3) - (negative_count * 5)))
+            else:
+                confidence_score = random.randint(65, 85)
+                overall_score = random.randint(70, 90)
+            
+            analysis = VoiceAnalysisResponse(
+                overall_score=overall_score,
+                tone_analysis={
+                    "warmth": random.randint(70, 95),
+                    "authority": random.randint(65, 90),
+                    "enthusiasm": random.randint(60, 95),
+                    "empathy": random.randint(70, 90),
+                    "professionalism": random.randint(75, 95)
+                },
+                pace_analysis={
+                    "words_per_minute": random.randint(120, 160),
+                    "optimal_range": "130-150 WPM",
+                    "pauses_used_effectively": random.choice([True, False]),
+                    "rushed_sections": random.randint(0, 3),
+                    "recommendation": "Slow down slightly during pricing discussion"
+                },
+                energy_level="High" if overall_score > 80 else "Medium" if overall_score > 65 else "Low",
+                confidence_score=confidence_score,
+                improvements=[
+                    "Use more specific numbers when discussing savings",
+                    "Add a brief pause after stating the price to let it sink in",
+                    "Ask more open-ended questions to understand customer needs"
+                ],
+                strengths=[
+                    "Excellent rapport building in the opening",
+                    "Clear explanation of the installation process",
+                    "Good handling of the financing question"
+                ],
+                coaching_tips=[
+                    "Try the 'feel, felt, found' technique for objections",
+                    "Mirror the customer's energy level for better connection",
+                    "Use the customer's name 3-5 times during the call",
+                    "End with a clear next step and timeline"
+                ]
+            )
         
         return analysis
         
