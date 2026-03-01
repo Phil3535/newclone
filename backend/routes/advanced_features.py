@@ -8,6 +8,13 @@ Advanced Features Module for Solar Empire
 - Competitor Win/Loss Analysis
 - Utility Bill OCR Scanner
 - Credit Check Integration
+- Voice Notes & Offline Sync
+- AI Sentiment Detection
+- Solar Panel Degradation Predictor
+- Neighborhood Viral Effect Tracker
+- Dynamic Pricing AI
+- AR Roof Visualizer
+- Smart Contract Blockchain Logging
 """
 
 from fastapi import APIRouter, HTTPException, UploadFile, File
@@ -20,6 +27,7 @@ import os
 import json
 import base64
 import random
+import hashlib
 
 router = APIRouter(prefix="/api/advanced", tags=["Advanced Features"])
 
