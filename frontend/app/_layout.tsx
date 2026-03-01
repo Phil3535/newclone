@@ -89,6 +89,7 @@ function RootLayoutContent() {
   };
 
   const handleLegalAccept = () => {
+    console.log('Legal agreements accepted, transitioning to main app...');
     setShowLegalAgreement(false);
     setIsReaccept(false);
   };
