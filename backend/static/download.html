@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Empire - Download App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 50%, #0a1628 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: 0 20px 40px rgba(245, 158, 11, 0.3);
+        }
+        
+        .logo svg {
+            width: 60px;
+            height: 60px;
+            fill: white;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .tagline {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            margin-bottom: 40px;
+        }
+        
+        .hero-image {
+            max-width: 300px;
+            margin: 0 auto 40px;
+            position: relative;
+        }
+        
+        .phone-mockup {
+            background: #0f1a2e;
+            border-radius: 40px;
+            padding: 12px;
+            border: 3px solid #1e3a5f;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+        }
+        
+        .phone-screen {
+            background: linear-gradient(180deg, #0a1628, #1e3a5f);
+            border-radius: 32px;
+            padding: 20px;
+            min-height: 400px;
+        }
+        
+        .screen-header {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        
+        .screen-header small {
+            color: #64748b;
+            font-size: 12px;
+        }
+        
+        .screen-header h3 {
+            font-size: 20px;
+            color: #ffffff;
+        }
+        
+        .stat-card {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #f59e0b;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .feature-item {
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+        
+        .download-section {
+            margin: 40px 0;
+        }
+        
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            text-decoration: none;
+            padding: 20px 40px;
+            border-radius: 16px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.4);
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(34, 197, 94, 0.5);
+        }
+        
+        .download-btn svg {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .platform-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 100px;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+        
+        .instructions {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 32px;
+            margin: 40px 0;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+        
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .step-content h4 {
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+        
+        .step-content p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .features-section {
+            margin: 60px 0;
+        }
+        
+        .features-section h2 {
+            font-size: 2rem;
+            margin-bottom: 32px;
+        }
+        
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            text-align: left;
+        }
+        
+        .feature-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 24px;
+        }
+        
+        .feature-card h4 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        
+        .feature-card p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .cta-section {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.05));
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            margin: 40px 0;
+        }
+        
+        .cta-section h2 {
+            font-size: 1.75rem;
+            margin-bottom: 16px;
+        }
+        
+        .cta-section p {
+            color: #94a3b8;
+            margin-bottom: 24px;
+        }
+        
+        footer {
+            margin-top: 60px;
+            padding: 20px;
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            .tagline {
+                font-size: 1rem;
+            }
+            .download-btn {
+                padding: 16px 32px;
+                font-size: 1rem;
+            }
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo -->
+        <div class="logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/>
+                <line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+        </div>
+        
+        <h1>Solar Empire</h1>
+        <p class="tagline">AI-Powered Territory Intelligence for Solar Sales</p>
+        
+        <!-- Phone Mockup -->
+        <div class="hero-image">
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    <div class="screen-header">
+                        <small>Welcome back, Rep!</small>
+                        <h3>Your Dashboard</h3>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">$47,250</div>
+                        <div class="stat-label">Revenue This Month</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Hot Leads Today</div>
+                    </div>
+                    <div class="features-grid">
+                        <div class="feature-item">🎯 AI Lead Hunter</div>
+                        <div class="feature-item">📱 AR Scanner</div>
+                        <div class="feature-item">🗺️ Smart Routes</div>
+                        <div class="feature-item">📊 Analytics</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Download Button -->
+        <div class="download-section">
+            <a href="https://expo.dev/artifacts/eas/6xJGf8pkdjtG5a4zqZUvWu.apk" class="download-btn" download>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.523 2H6.477C5.111 2 4 3.111 4 4.477v15.046C4 20.889 5.111 22 6.477 22h11.046C18.889 22 20 20.889 20 19.523V4.477C20 3.111 18.889 2 17.523 2zM12 19.5c-.828 0-1.5-.672-1.5-1.5s.672-1.5 1.5-1.5 1.5.672 1.5 1.5-.672 1.5-1.5 1.5zM17 15H7V5h10v10z"/>
+                </svg>
+                Download for Android
+            </a>
+            <div class="platform-badge">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#3DDC84">
+                    <path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C13.85 1.23 12.95 1 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31C6.97 3.26 6 5.01 6 7h12c0-1.99-.97-3.75-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/>
+                </svg>
+                Android APK • 45 MB
+            </div>
+        </div>
+        
+        <!-- Installation Instructions -->
+        <div class="instructions">
+            <h3>📲 How to Install</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Download the APK</h4>
+                    <p>Tap the green download button above on your Android phone</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Allow Installation</h4>
+                    <p>If prompted, go to Settings → Security → Enable "Unknown Sources" or "Install unknown apps"</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Install & Open</h4>
+                    <p>Open the downloaded file and tap "Install". Once done, open Solar Empire!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features -->
+        <div class="features-section">
+            <h2>🚀 Powerful Features</h2>
+            <div class="features-list">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h4>AI Lead Hunter</h4>
+                    <p>Automatically find hot solar leads in your territory</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🗺️</div>
+                    <h4>Smart Routing</h4>
+                    <p>AI-optimized door knocking routes</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h4>AR Roof Scanner</h4>
+                    <p>Point your camera at any roof for instant analysis</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📄</div>
+                    <h4>Instant Proposals</h4>
+                    <p>Generate professional proposals in 60 seconds</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h4>AI Lead Scoring</h4>
+                    <p>Know exactly who's ready to buy</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏆</div>
+                    <h4>Leaderboards</h4>
+                    <p>Track performance and compete with your team</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CTA -->
+        <div class="cta-section">
+            <h2>Ready to Dominate Your Territory?</h2>
+            <p>Join top solar reps who are closing more deals with AI-powered intelligence</p>
+            <a href="https://expo.dev/artifacts/eas/6xJGf8pkdjtG5a4zqZUvWu.apk" class="download-btn" download>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                    <path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/>
+                </svg>
+                Get Solar Empire Now
+            </a>
+        </div>
+        
+        <footer>
+            <p>© 2026 Solar Empire. All rights reserved.</p>
+            <p style="margin-top: 8px;">Questions? Contact support@solarempire.com</p>
+        </footer>
+    </div>
+</body>
+</html>

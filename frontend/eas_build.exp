@@ -1,0 +1,25 @@
+#!/usr/bin/expect -f
+
+set timeout 600
+set env(EXPO_TOKEN) "L4A5iABcEN3l4KcvKPzIft2aJoDYGzGZVrGVtAjk"
+set env(EAS_NO_VCS) "1"
+
+cd "/app/frontend"
+
+spawn npx eas build --platform android --profile preview --non-interactive
+
+expect {
+    "Build details" {
+        puts "Build submitted!"
+        exp_continue
+    }
+    "Waiting for build" {
+        puts "Waiting for build to complete..."
+        exp_continue
+    }
+    eof {
+        puts "Process finished"
+    }
+}
+
+wait

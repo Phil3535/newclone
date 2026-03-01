@@ -1,0 +1,35 @@
+#!/usr/bin/expect -f
+
+set timeout 600
+set env(EXPO_TOKEN) "L4A5iABcEN3l4KcvKPzIft2aJoDYGzGZVrGVtAjk"
+set env(EAS_NO_VCS) "1"
+
+cd "/app/frontend"
+
+spawn npx eas build --platform ios --profile preview
+
+expect {
+    "Would you like to" {
+        send "y\r"
+        exp_continue
+    }
+    "Generate a new" {
+        send "y\r"
+        exp_continue
+    }
+    "Build details:" {
+        puts "\n\n========== iOS BUILD SUBMITTED! =========="
+    }
+    "Waiting for build" {
+        puts "iOS Build is running in the cloud..."
+        exp_continue
+    }
+    timeout {
+        puts "Timeout - check expo.dev for build status"
+    }
+    eof {
+        puts "Process finished"
+    }
+}
+
+wait

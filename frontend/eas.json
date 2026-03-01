@@ -1,0 +1,25 @@
+{
+  "cli": {
+    "version": ">= 5.0.0",
+    "requireCommit": false,
+    "appVersionSource": "local"
+  },
+  "build": {
+    "production": {
+      "ios": {
+        "credentialsSource": "remote",
+        "distribution": "store"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascApiKeyPath": "./asc_key.p8",
+        "ascApiKeyIssuerId": "feeaa8ec-7b2d-4665-86fd-8d5d4ce20477",
+        "ascApiKeyId": "BCH6CKV4TC",
+        "ascAppId": "6743247871"
+      }
+    }
+  }
+}

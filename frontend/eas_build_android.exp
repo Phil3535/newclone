@@ -1,0 +1,39 @@
+#!/usr/bin/expect -f
+
+set timeout 600
+set env(EXPO_TOKEN) "L4A5iABcEN3l4KcvKPzIft2aJoDYGzGZVrGVtAjk"
+set env(EAS_NO_VCS) "1"
+
+cd "/app/frontend"
+
+spawn npx eas build --platform android --profile preview
+
+expect {
+    "Generate a new Android Keystore" {
+        send "y\r"
+        exp_continue
+    }
+    "Would you like to generate" {
+        send "y\r"
+        exp_continue
+    }
+    "keystore" {
+        send "y\r"
+        exp_continue
+    }
+    "Build details:" {
+        puts "\n\n========== BUILD SUBMITTED! =========="
+    }
+    "Waiting for build" {
+        puts "Build is running in the cloud..."
+        exp_continue
+    }
+    timeout {
+        puts "Timeout - check expo.dev for build status"
+    }
+    eof {
+        puts "Process finished"
+    }
+}
+
+wait

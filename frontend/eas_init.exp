@@ -1,0 +1,36 @@
+#!/usr/bin/expect -f
+
+set timeout 120
+set env(EXPO_TOKEN) "L4A5iABcEN3l4KcvKPzIft2aJoDYGzGZVrGVtAjk"
+set env(EAS_NO_VCS) "1"
+
+cd "/app/frontend"
+
+spawn npx eas init
+
+expect {
+    "Would you like to create a project" {
+        send "y\r"
+        exp_continue
+    }
+    "What would you like your project to be called" {
+        send "solar-empire\r"
+        exp_continue
+    }
+    "Select a project" {
+        send "\r"
+        exp_continue
+    }
+    "successfully" {
+        puts "Project created successfully!"
+    }
+    timeout {
+        puts "Timeout waiting for prompt"
+        exit 1
+    }
+    eof {
+        puts "Process finished"
+    }
+}
+
+wait
