@@ -24,6 +24,7 @@ from routes.admin import router as admin_router
 from routes.admin_auth import router as admin_auth_router
 from routes.two_factor_auth import router as two_factor_auth_router
 from routes.organizations import router as organizations_router
+from routes.advanced_features import router as advanced_features_router
 
 __all__ = [
     'legal_router',
@@ -47,5 +48,6 @@ __all__ = [
     'admin_router',
     'admin_auth_router',
     'two_factor_auth_router',
-    'organizations_router'
+    'organizations_router',
+    'advanced_features_router'
 ]
