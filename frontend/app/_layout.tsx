@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Component, ErrorInfo, ReactNode } from 'react';
 import { requestNotificationPermissions, addNotificationResponseListener } from '../src/services/notifications';
 import { initializeOfflineService, startNetworkListener } from '../src/services/offline';
 import { LanguageProvider } from '../src/contexts/LanguageContext';
@@ -9,7 +9,7 @@ import { ThemeProvider, useTheme } from '../src/contexts/ThemeContext';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LegalAgreementScreen from './legal-agreement';
-import { View, ActivityIndicator, Platform } from 'react-native';
+import { View, ActivityIndicator, Platform, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
@@ -17,6 +17,104 @@ const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 // Set to true to skip legal agreement in preview/development
 // eslint-disable-next-line no-undef
 const DEV_SKIP_LEGAL = typeof __DEV__ !== 'undefined' && __DEV__ || process.env.EXPO_PUBLIC_SKIP_LEGAL === 'true';
+
+// Error Boundary Component
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  onRetry: () => void;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={errorStyles.container}>
+          <View style={errorStyles.iconContainer}>
+            <Text style={errorStyles.icon}>!</Text>
+          </View>
+          <Text style={errorStyles.title}>Something went wrong</Text>
+          <Text style={errorStyles.message}>{this.state.error?.message || 'Unknown error'}</Text>
+          <TouchableOpacity 
+            style={errorStyles.retryButton} 
+            onPress={() => {
+              this.setState({ hasError: false, error: null });
+              this.props.onRetry();
+            }}
+          >
+            <Text style={errorStyles.retryText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+const errorStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    padding: 20,
+  },
+  iconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#ef4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  icon: {
+    color: '#ffffff',
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  message: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#f59e0b',
+    paddingHorizontal: 40,
+    paddingVertical: 15,
+    borderRadius: 10,
+  },
+  retryText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
 
 function RootLayoutContent() {
   const router = useRouter();
