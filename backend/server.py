@@ -42,7 +42,8 @@ from routes import (
     admin_router,
     admin_auth_router,
     two_factor_auth_router,
-    organizations_router
+    organizations_router,
+    advanced_features_router
 )
 
 ROOT_DIR = Path(__file__).parent
