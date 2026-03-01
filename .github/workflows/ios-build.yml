@@ -17,16 +17,17 @@ jobs:
       - name: Install EAS CLI
         run: npm install -g eas-cli
         
-      - name: Setup Expo
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Login to Expo
+        run: npx eas-cli login --token ${{ secrets.EXPO_TOKEN }}
+      
+      - name: Configure EAS Project
+        working-directory: ./frontend
+        run: npx eas-cli init --id 663879d6-8733-4add-84e2-3ee7d213dac4 --non-interactive || echo "Already configured"
           
       - name: Build iOS
         working-directory: ./frontend
-        run: eas build --platform ios --profile production --non-interactive
+        run: npx eas-cli build --platform ios --profile production --non-interactive
         
       - name: Submit to App Store
         working-directory: ./frontend
-        run: eas submit --platform ios --latest --non-interactive
+        run: npx eas-cli submit --platform ios --latest --non-interactive
