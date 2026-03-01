@@ -314,6 +314,7 @@ export default function LegalAgreementScreen({ onAccept, isReaccept = false }: L
   });
   const [expandedAgreement, setExpandedAgreement] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const allChecked = Object.values(agreements).every(v => v);
 
