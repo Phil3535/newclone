@@ -383,9 +383,6 @@ export default function LegalAgreementScreen({ onAccept, isReaccept = false }: L
           resizeMode="cover"
           onError={() => setImageError(true)}
         />
-          style={styles.backgroundImage}
-          resizeMode="cover"
-        />
       )}
       <View style={styles.overlay} />
       <SafeAreaView style={styles.container} data-testid="legal-agreement-screen">
