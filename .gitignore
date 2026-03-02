@@ -80,3 +80,7 @@ agenthub/agents/youtube/db
 android-sdk/ frontend/node_modules/.cache/default-development/1.pack
 frontend/node_modules/.cache/default-development/1.pack
 # Note: .env files are NOT ignored - they are needed for deployment
+-e 
+# Environment files
+*.env
+*.env.*
