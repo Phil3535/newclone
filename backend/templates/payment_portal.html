@@ -21,6 +21,10 @@
             --border: rgba(148, 163, 184, 0.1);
             --gradient-start: #0a192f;
             --gradient-end: #1e3a5f;
+            --purple: #8b5cf6;
+            --blue: #3b82f6;
+            --pink: #ec4899;
+            --cyan: #06b6d4;
         }
         
         * {
@@ -85,7 +89,7 @@
         .hero-subtitle {
             font-size: clamp(1rem, 2vw, 1.25rem);
             color: var(--text-secondary);
-            max-width: 700px;
+            max-width: 800px;
             margin: 0 auto 32px;
         }
         
@@ -138,8 +142,8 @@
             letter-spacing: 1px;
         }
         
-        /* Pricing Section */
-        .pricing-section {
+        /* Section Styles */
+        .section {
             padding: 80px 24px;
             max-width: 1400px;
             margin: 0 auto;
@@ -159,11 +163,130 @@
         .section-subtitle {
             color: var(--text-secondary);
             font-size: 1.1rem;
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
         }
         
-        /* Pricing Cards */
+        /* Feature Categories */
+        .feature-category {
+            margin-bottom: 60px;
+        }
+        
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .category-icon {
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            font-size: 24px;
+        }
+        
+        .category-icon.ai { background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.05)); color: var(--purple); }
+        .category-icon.mobile { background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.05)); color: var(--blue); }
+        .category-icon.analytics { background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.05)); color: var(--accent); }
+        .category-icon.automation { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05)); color: var(--success); }
+        .category-icon.blockchain { background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(236, 72, 153, 0.05)); color: var(--pink); }
+        .category-icon.advanced { background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.05)); color: var(--cyan); }
+        
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .category-count {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        /* Feature Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .feature-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+        
+        .feature-icon i {
+            font-size: 20px;
+            color: var(--accent);
+        }
+        
+        .feature-card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .feature-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--purple), var(--pink));
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        /* Pricing Section */
+        .pricing-section {
+            padding: 80px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
         .pricing-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
@@ -308,7 +431,6 @@
             font-size: 14px;
         }
         
-        /* Exclusivity Add-on */
         .addon-section {
             margin-top: 16px;
             padding: 16px;
@@ -339,7 +461,6 @@
             margin-top: 4px;
         }
         
-        /* CTA Button */
         .cta-button {
             display: block;
             width: 100%;
@@ -359,16 +480,6 @@
         .cta-button:hover {
             transform: scale(1.02);
             box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
-        }
-        
-        .cta-button.secondary {
-            background: transparent;
-            border: 2px solid var(--accent);
-            color: var(--accent);
-        }
-        
-        .cta-button.secondary:hover {
-            background: rgba(245, 158, 11, 0.1);
         }
         
         /* Strategic Notes */
@@ -437,62 +548,45 @@
             font-size: 14px;
         }
         
-        /* Features Section */
-        .features-section {
-            padding: 80px 24px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 24px;
-            margin-top: 40px;
-        }
-        
-        .feature-card {
-            padding: 24px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
+        /* Testimonial/Social Proof */
+        .social-proof {
+            padding: 60px 24px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, transparent 100%);
             text-align: center;
-            transition: all 0.3s ease;
         }
         
-        .feature-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-4px);
+        .proof-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            max-width: 800px;
+            margin: 0 auto 24px;
+            line-height: 1.4;
         }
         
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.05) 100%);
-            border-radius: 16px;
-            margin: 0 auto 16px;
+        .proof-author {
+            color: var(--text-secondary);
         }
         
-        .feature-icon i {
-            font-size: 28px;
+        /* Footer */
+        footer {
+            padding: 40px 24px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+        
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
             color: var(--accent);
+            margin-bottom: 12px;
         }
         
-        .feature-card h4 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        
-        .feature-card p {
+        .footer-text {
             color: var(--text-secondary);
             font-size: 14px;
         }
         
-        /* Contact Form Modal */
+        /* Modal */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -661,7 +755,6 @@
             transform: none;
         }
         
-        /* Success State */
         .success-message {
             text-align: center;
             padding: 40px 32px;
@@ -694,25 +787,6 @@
             margin-bottom: 24px;
         }
         
-        /* Footer */
-        footer {
-            padding: 40px 24px;
-            text-align: center;
-            border-top: 1px solid var(--border);
-        }
-        
-        .footer-logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--accent);
-            margin-bottom: 12px;
-        }
-        
-        .footer-text {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-        
         /* Responsive */
         @media (max-width: 768px) {
             .pricing-grid {
@@ -730,9 +804,12 @@
             .stat-value {
                 font-size: 2rem;
             }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
-        /* Loading spinner */
         .spinner {
             display: inline-block;
             width: 20px;
@@ -746,6 +823,22 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        
+        /* Patent Badge */
+        .patent-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--purple);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
@@ -753,12 +846,12 @@
     <section class="hero">
         <div class="hero-badge">
             <i class="fas fa-bolt"></i>
-            <span>AI-Powered Territory Intelligence</span>
+            <span>24+ AI-Powered Features | Patent-Pending Technology</span>
         </div>
         <h1>SOLAR EMPIRE</h1>
         <p class="hero-subtitle">
-            Automated leads, AI territory optimization, mobile app for reps, full analytics — 
-            <strong>exclusive edge for your business.</strong>
+            The most advanced AI territory intelligence system for solar companies. 
+            Automate lead generation, optimize territories, empower your reps, and <strong>dominate your market.</strong>
         </p>
         <div class="hero-features">
             <div class="hero-feature">
@@ -776,6 +869,10 @@
             <div class="hero-feature">
                 <i class="fas fa-check-circle"></i>
                 <span>Real-Time Analytics</span>
+            </div>
+            <div class="hero-feature">
+                <i class="fas fa-check-circle"></i>
+                <span>Blockchain Contracts</span>
             </div>
         </div>
     </section>
@@ -800,8 +897,434 @@
         </div>
     </div>
     
+    <!-- All Features Section -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Complete Feature Suite</h2>
+            <p class="section-subtitle">Everything you need to transform your solar sales operation into a revenue-generating machine</p>
+        </div>
+        
+        <!-- AI Intelligence Features -->
+        <div class="feature-category">
+            <div class="category-header">
+                <div class="category-icon ai">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div>
+                    <h3 class="category-title">AI Intelligence & Sales Tools</h3>
+                </div>
+                <span class="category-count">8 Features</span>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-star"></i></div>
+                        <div>
+                            <h4>AI Lead Scoring</h4>
+                            <span class="patent-badge"><i class="fas fa-shield-alt"></i> Patent-Pending</span>
+                        </div>
+                    </div>
+                    <p>GPT-4 powered scoring analyzes 15+ data points to rank leads 0-100. Know exactly who to call first.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-heart-pulse"></i></div>
+                        <div>
+                            <h4>AI Sentiment Detection</h4>
+                            <span class="patent-badge"><i class="fas fa-shield-alt"></i> Patent-Pending</span>
+                        </div>
+                    </div>
+                    <p>Real-time customer sentiment analysis during calls. Know when to push, when to pause, when to close.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-microphone"></i></div>
+                        <div>
+                            <h4>AI Voice Pitch Analyzer</h4>
+                            <span class="patent-badge"><i class="fas fa-shield-alt"></i> Patent-Pending</span>
+                        </div>
+                    </div>
+                    <p>Record sales pitches and get AI feedback on persuasiveness, clarity, and effectiveness. Train your team to perfection.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                        <div>
+                            <h4>AI Sales Coach</h4>
+                        </div>
+                    </div>
+                    <p>24/7 AI assistant that answers questions, handles objections, and provides real-time sales guidance.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-file-contract"></i></div>
+                        <div>
+                            <h4>AI Contract Generator</h4>
+                            <span class="patent-badge"><i class="fas fa-shield-alt"></i> Patent-Pending</span>
+                        </div>
+                    </div>
+                    <p>Generate complete solar contracts with accurate calculations, financing options, and legal terms in seconds.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-dollar-sign"></i></div>
+                        <div>
+                            <h4>Dynamic Pricing AI</h4>
+                            <span class="patent-badge"><i class="fas fa-shield-alt"></i> Patent-Pending</span>
+                        </div>
+                    </div>
+                    <p>AI-optimized pricing based on market conditions, competitor analysis, and customer profile. Maximize every deal.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                        <div>
+                            <h4>Revenue Forecasting AI</h4>
+                        </div>
+                    </div>
+                    <p>Predict future revenue with seasonal adjustments and confidence intervals. Plan ahead with precision.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-chess"></i></div>
+                        <div>
+                            <h4>Competitor Win/Loss Analysis</h4>
+                        </div>
+                    </div>
+                    <p>AI-powered analysis of why you win or lose deals. Get tactical recommendations to beat competitors.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile & Field Features -->
+        <div class="feature-category">
+            <div class="category-header">
+                <div class="category-icon mobile">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <div>
+                    <h3 class="category-title">Mobile App for Reps</h3>
+                </div>
+                <span class="category-count">7 Features</span>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-mobile-screen-button"></i></div>
+                        <div>
+                            <h4>iOS & Android App</h4>
+                        </div>
+                    </div>
+                    <p>Native mobile apps for your entire sales team. Available on App Store ($299.99) with all features included.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-wifi-slash"></i></div>
+                        <div>
+                            <h4>Offline Mode</h4>
+                            <span class="patent-badge"><i class="fas fa-shield-alt"></i> Patent-Pending</span>
+                        </div>
+                    </div>
+                    <p>Full functionality without internet. Auto-syncs when back online. Never lose data in the field.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-microphone-lines"></i></div>
+                        <div>
+                            <h4>Voice Commands</h4>
+                            <span class="patent-badge"><i class="fas fa-shield-alt"></i> Patent-Pending</span>
+                        </div>
+                    </div>
+                    <p>"Add lead John Smith" - Hands-free operation while driving between appointments. 6 command types supported.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-id-card"></i></div>
+                        <div>
+                            <h4>Business Card Scanner</h4>
+                        </div>
+                    </div>
+                    <p>Snap a photo of any business card. AI extracts contact info and creates a lead automatically.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-nfc-symbol"></i></div>
+                        <div>
+                            <h4>NFC Card Exchange</h4>
+                            <span class="patent-badge"><i class="fas fa-shield-alt"></i> Patent-Pending</span>
+                        </div>
+                    </div>
+                    <p>Tap phones to instantly share digital business cards. Modern networking for modern sales reps.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-cube"></i></div>
+                        <div>
+                            <h4>AR Roof Visualizer</h4>
+                            <span class="patent-badge"><i class="fas fa-shield-alt"></i> Patent-Pending</span>
+                        </div>
+                    </div>
+                    <p>Point your phone at any roof and see solar panels overlaid in AR. Close deals on the spot.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-route"></i></div>
+                        <div>
+                            <h4>Smart Route Planning</h4>
+                        </div>
+                    </div>
+                    <p>AI-optimized driving routes between appointments. Save time and gas money every day.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Territory & Analytics -->
+        <div class="feature-category">
+            <div class="category-header">
+                <div class="category-icon analytics">
+                    <i class="fas fa-map-location-dot"></i>
+                </div>
+                <div>
+                    <h3 class="category-title">Territory Intelligence & Analytics</h3>
+                </div>
+                <span class="category-count">6 Features</span>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-map"></i></div>
+                        <div>
+                            <h4>Territory Heat Maps</h4>
+                        </div>
+                    </div>
+                    <p>Visual heat maps showing opportunity density by ZIP code. Know exactly where to focus your efforts.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-calculator"></i></div>
+                        <div>
+                            <h4>Territory Value Calculator</h4>
+                            <span class="patent-badge"><i class="fas fa-shield-alt"></i> Patent-Pending</span>
+                        </div>
+                    </div>
+                    <p>50+ factor analysis determines the true value of any territory. Make data-driven expansion decisions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-virus"></i></div>
+                        <div>
+                            <h4>Viral Effect Tracker</h4>
+                            <span class="patent-badge"><i class="fas fa-shield-alt"></i> Patent-Pending</span>
+                        </div>
+                    </div>
+                    <p>Track how installations spread through neighborhoods. Identify "patient zero" homes that trigger viral adoption.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-gauge-high"></i></div>
+                        <div>
+                            <h4>Real-Time Dashboards</h4>
+                        </div>
+                    </div>
+                    <p>Live performance dashboards for reps and managers. Track KPIs, conversions, and revenue in real-time.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-trophy"></i></div>
+                        <div>
+                            <h4>Gamification & Leaderboards</h4>
+                        </div>
+                    </div>
+                    <p>Motivate your team with rankings, badges, and competitions. Watch performance soar.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-cloud-sun"></i></div>
+                        <div>
+                            <h4>Weather-Based Outreach</h4>
+                        </div>
+                    </div>
+                    <p>AI recommends the best times to contact leads based on local weather patterns. Sunny day? Perfect for solar talk.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Automation Features -->
+        <div class="feature-category">
+            <div class="category-header">
+                <div class="category-icon automation">
+                    <i class="fas fa-gears"></i>
+                </div>
+                <div>
+                    <h3 class="category-title">Automation & Communication</h3>
+                </div>
+                <span class="category-count">5 Features</span>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-comment-sms"></i></div>
+                        <div>
+                            <h4>SMS Automation</h4>
+                        </div>
+                    </div>
+                    <p>Automated follow-ups, appointment reminders, and hot lead alerts. Twilio-powered reliability.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-envelope"></i></div>
+                        <div>
+                            <h4>Email Drip Campaigns</h4>
+                        </div>
+                    </div>
+                    <p>Automated email sequences that nurture leads through the funnel. Set it and forget it.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                        <div>
+                            <h4>Zapier & CRM Webhooks</h4>
+                        </div>
+                    </div>
+                    <p>Connect to 5000+ apps via Zapier. Integrate with your existing CRM and tools seamlessly.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-bell"></i></div>
+                        <div>
+                            <h4>Smart Notifications</h4>
+                        </div>
+                    </div>
+                    <p>Get instant alerts when hot leads come in, deals close, or action is needed. Never miss an opportunity.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+                        <div>
+                            <h4>Appointment Scheduling</h4>
+                        </div>
+                    </div>
+                    <p>Built-in scheduling system with automatic reminders. Reduce no-shows by 60%.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Advanced & Blockchain -->
+        <div class="feature-category">
+            <div class="category-header">
+                <div class="category-icon blockchain">
+                    <i class="fas fa-link"></i>
+                </div>
+                <div>
+                    <h3 class="category-title">Advanced & Blockchain Features</h3>
+                </div>
+                <span class="category-count">4 Features</span>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-cubes"></i></div>
+                        <div>
+                            <h4>Blockchain Contract Logging</h4>
+                            <span class="patent-badge"><i class="fas fa-shield-alt"></i> Patent-Pending</span>
+                        </div>
+                    </div>
+                    <p>Every contract gets an immutable blockchain record. Tamper-proof verification for legal protection.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-solar-panel"></i></div>
+                        <div>
+                            <h4>Panel Degradation Predictor</h4>
+                            <span class="patent-badge"><i class="fas fa-shield-alt"></i> Patent-Pending</span>
+                        </div>
+                    </div>
+                    <p>AI predicts when panels need replacement. Schedule maintenance proactively and upsell services.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-satellite"></i></div>
+                        <div>
+                            <h4>Satellite Roof Measurement</h4>
+                        </div>
+                    </div>
+                    <p>Instant roof measurements from satellite imagery. No ladders, no site visits for initial quotes.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-file-invoice"></i></div>
+                        <div>
+                            <h4>Utility Bill OCR Scanner</h4>
+                        </div>
+                    </div>
+                    <p>Snap a photo of any utility bill. AI extracts usage data and calculates savings instantly.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin & Enterprise -->
+        <div class="feature-category">
+            <div class="category-header">
+                <div class="category-icon advanced">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div>
+                    <h3 class="category-title">Admin & Enterprise</h3>
+                </div>
+                <span class="category-count">5 Features</span>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-shield-halved"></i></div>
+                        <div>
+                            <h4>Admin Dashboard</h4>
+                        </div>
+                    </div>
+                    <p>Complete control panel for managers. User management, analytics, settings, and more.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-users-gear"></i></div>
+                        <div>
+                            <h4>Role-Based Access Control</h4>
+                        </div>
+                    </div>
+                    <p>Super Admin, Admin, Manager, Rep - granular permissions for every role in your organization.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-palette"></i></div>
+                        <div>
+                            <h4>White-Label Branding</h4>
+                        </div>
+                    </div>
+                    <p>Put your logo, colors, and brand on everything. Your customers never see "Solar Empire".</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-building-columns"></i></div>
+                        <div>
+                            <h4>Multi-Tenancy</h4>
+                        </div>
+                    </div>
+                    <p>Run multiple organizations from one platform. Perfect for franchises or multi-location companies.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card-header">
+                        <div class="feature-icon"><i class="fas fa-handshake"></i></div>
+                        <div>
+                            <h4>Partner/Investor Portal</h4>
+                        </div>
+                    </div>
+                    <p>Dedicated dashboard for partners showing ROI, revenue share, and territory performance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
     <!-- Pricing Section -->
-    <section class="pricing-section">
+    <section class="pricing-section" id="pricing">
         <div class="section-header">
             <h2 class="section-title">Investment Options</h2>
             <p class="section-subtitle">Choose the partnership model that best fits your business growth strategy</p>
@@ -826,7 +1349,11 @@
                     </li>
                     <li>
                         <i class="fas fa-check"></i>
-                        <span>Mobile App for All Your Reps</span>
+                        <span>Mobile App for All Your Reps (iOS & Android)</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>All 24+ AI Features Included</span>
                     </li>
                     <li>
                         <i class="fas fa-check"></i>
@@ -834,11 +1361,11 @@
                     </li>
                     <li>
                         <i class="fas fa-check"></i>
-                        <span>Optional Custom Enhancements</span>
+                        <span>White-Label Branding Available</span>
                     </li>
                     <li>
                         <i class="fas fa-check"></i>
-                        <span>White-Label Branding Available</span>
+                        <span>Source Code Access (Optional)</span>
                     </li>
                 </ul>
                 <div class="pros-section">
@@ -868,11 +1395,15 @@
                 <ul class="features-list">
                     <li>
                         <i class="fas fa-check"></i>
-                        <span>Full Platform Access & Updates</span>
+                        <span>Full Platform Access & All Features</span>
                     </li>
                     <li>
                         <i class="fas fa-check"></i>
                         <span>Ongoing Support & Maintenance</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Free Updates & New Features</span>
                     </li>
                     <li>
                         <i class="fas fa-check"></i>
@@ -917,7 +1448,7 @@
                 <ul class="features-list">
                     <li>
                         <i class="fas fa-check"></i>
-                        <span>Full Platform Access & Updates</span>
+                        <span>Full Platform Access & All Features</span>
                     </li>
                     <li>
                         <i class="fas fa-check"></i>
@@ -926,6 +1457,10 @@
                     <li>
                         <i class="fas fa-check"></i>
                         <span>Long-Term Revenue Upside</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Priority Support & Training</span>
                     </li>
                     <li>
                         <i class="fas fa-check"></i>
@@ -986,62 +1521,20 @@
         </div>
     </section>
     
-    <!-- Features Section -->
-    <section class="features-section">
-        <div class="section-header">
-            <h2 class="section-title">What's Included</h2>
-            <p class="section-subtitle">Everything you need to dominate your solar territory</p>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-brain"></i>
-                </div>
-                <h4>AI Lead Scoring</h4>
-                <p>Automatically score and prioritize leads based on 15+ data points</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-map-marked-alt"></i>
-                </div>
-                <h4>Territory Intelligence</h4>
-                <p>Heat maps, ZIP analysis, and optimized route planning</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-mobile-alt"></i>
-                </div>
-                <h4>Mobile Rep App</h4>
-                <p>iOS & Android apps for your entire sales team</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-trophy"></i>
-                </div>
-                <h4>Gamification</h4>
-                <p>Leaderboards, badges, and incentives to drive performance</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-comments"></i>
-                </div>
-                <h4>AI Sales Coach</h4>
-                <p>Real-time suggestions and objection handling</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-chart-bar"></i>
-                </div>
-                <h4>Advanced Analytics</h4>
-                <p>Revenue forecasts, conversion tracking, and ROI dashboards</p>
-            </div>
-        </div>
+    <!-- Social Proof -->
+    <section class="social-proof">
+        <p class="proof-text">
+            "The future of solar sales is AI-powered territory intelligence. <br>Don't get left behind."
+        </p>
+        <p class="proof-author">— Solar Empire Team</p>
     </section>
     
     <!-- Footer -->
     <footer>
         <div class="footer-logo">Solar Empire</div>
         <p class="footer-text">AI Appointment + Territory Intelligence System</p>
+        <p class="footer-text" style="margin-top: 8px;">24+ Patent-Pending AI Features</p>
+        <p class="footer-text" style="margin-top: 16px;">Contact: phillipromero54@gmail.com</p>
         <p class="footer-text" style="margin-top: 8px;">© 2024 Solar Empire. All rights reserved.</p>
     </footer>
     
@@ -1204,6 +1697,14 @@
                 submitBtn.innerHTML = 'Submit Inquiry';
             }
         }
+        
+        // Smooth scroll to pricing when clicking hero CTA
+        document.querySelectorAll('a[href="#pricing"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector('#pricing').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
     </script>
 </body>
 </html>
