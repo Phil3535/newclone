@@ -4185,7 +4185,7 @@ async def submit_business_inquiry(inquiry: BusinessInquiry):
             # Send notification to admin
             resend.Emails.send({
                 "from": "Solar Empire <notifications@resend.dev>",
-                "to": ["philromero35@gmail.com"],
+                "to": ["phillipromero54@gmail.com"],
                 "subject": f"🔥 New B2B Inquiry: {inquiry.company} - {inquiry.selected_plan}",
                 "html": f"""
                 <h2>New Business Partnership Inquiry</h2>
