@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Empire | AI Territory Intelligence System for Solar Companies</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0a192f;
+            --secondary: #112240;
+            --accent: #f59e0b;
+            --accent-hover: #d97706;
+            --success: #10b981;
+            --gold: #fbbf24;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --card-bg: rgba(17, 34, 64, 0.95);
+            --border: rgba(148, 163, 184, 0.1);
+            --gradient-start: #0a192f;
+            --gradient-end: #1e3a5f;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        /* Hero Section */
+        .hero {
+            position: relative;
+            padding: 80px 24px 60px;
+            text-align: center;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 24px;
+        }
+        
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff 0%, #fbbf24 50%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+        
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 32px;
+        }
+        
+        .hero-features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        
+        .hero-feature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+        
+        .hero-feature i {
+            color: var(--success);
+        }
+        
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            padding: 40px 24px;
+            background: var(--secondary);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Pricing Section */
+        .pricing-section {
+            padding: 80px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-title {
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+        
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Pricing Cards */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        
+        .pricing-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            position: relative;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(245, 158, 11, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--accent);
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.1) 0%, var(--card-bg) 100%);
+        }
+        
+        .featured-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 100%);
+            color: var(--primary);
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .card-header {
+            text-align: center;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        
+        .option-label {
+            display: inline-block;
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .card-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .price-container {
+            text-align: center;
+            padding: 24px 0;
+        }
+        
+        .price-range {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        
+        .price-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        
+        .rev-share {
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 10px;
+        }
+        
+        .rev-share-text {
+            color: var(--success);
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 24px;
+        }
+        
+        .features-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            font-size: 15px;
+        }
+        
+        .features-list li i {
+            color: var(--success);
+            margin-top: 3px;
+        }
+        
+        .pros-section {
+            padding: 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 10px;
+            margin-bottom: 24px;
+        }
+        
+        .pros-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--success);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        
+        .pros-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Exclusivity Add-on */
+        .addon-section {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px dashed rgba(245, 158, 11, 0.4);
+            border-radius: 10px;
+        }
+        
+        .addon-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+        
+        .addon-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .addon-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        /* CTA Button */
+        .cta-button {
+            display: block;
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            color: var(--primary);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
+        }
+        
+        .cta-button.secondary {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .cta-button.secondary:hover {
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        /* Strategic Notes */
+        .strategy-section {
+            padding: 60px 24px;
+            background: var(--secondary);
+        }
+        
+        .strategy-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .strategy-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .strategy-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .strategy-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        
+        .strategy-card {
+            padding: 24px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+        
+        .strategy-card-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(245, 158, 11, 0.15);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .strategy-card-icon i {
+            font-size: 24px;
+            color: var(--accent);
+        }
+        
+        .strategy-card h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .strategy-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Features Section */
+        .features-section {
+            padding: 80px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+        
+        .feature-card {
+            padding: 24px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.05) 100%);
+            border-radius: 16px;
+            margin: 0 auto 16px;
+        }
+        
+        .feature-icon i {
+            font-size: 28px;
+            color: var(--accent);
+        }
+        
+        .feature-card h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Contact Form Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--secondary);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .modal-header {
+            padding: 32px 32px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        
+        .modal-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .selected-plan-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        
+        .modal-body {
+            padding: 24px 32px 32px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+        
+        .form-input::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        textarea.form-input {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .form-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .form-checkbox input {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent);
+            margin-top: 2px;
+        }
+        
+        .form-checkbox label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            color: var(--primary);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
+        }
+        
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Success State */
+        .success-message {
+            text-align: center;
+            padding: 40px 32px;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(16, 185, 129, 0.15);
+            border-radius: 50%;
+            margin: 0 auto 24px;
+        }
+        
+        .success-icon i {
+            font-size: 40px;
+            color: var(--success);
+        }
+        
+        .success-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        
+        .success-text {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 40px 24px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+        
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+        
+        .footer-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero {
+                padding: 60px 16px 40px;
+            }
+            
+            .stats-bar {
+                gap: 24px;
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-badge">
+            <i class="fas fa-bolt"></i>
+            <span>AI-Powered Territory Intelligence</span>
+        </div>
+        <h1>SOLAR EMPIRE</h1>
+        <p class="hero-subtitle">
+            Automated leads, AI territory optimization, mobile app for reps, full analytics — 
+            <strong>exclusive edge for your business.</strong>
+        </p>
+        <div class="hero-features">
+            <div class="hero-feature">
+                <i class="fas fa-check-circle"></i>
+                <span>AI Lead Scoring</span>
+            </div>
+            <div class="hero-feature">
+                <i class="fas fa-check-circle"></i>
+                <span>Territory Intelligence</span>
+            </div>
+            <div class="hero-feature">
+                <i class="fas fa-check-circle"></i>
+                <span>Mobile Rep App</span>
+            </div>
+            <div class="hero-feature">
+                <i class="fas fa-check-circle"></i>
+                <span>Real-Time Analytics</span>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat">
+            <div class="stat-value">40%</div>
+            <div class="stat-label">More Appointments</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">3x</div>
+            <div class="stat-label">Lead Conversion</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">24+</div>
+            <div class="stat-label">AI Features</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">ROI</div>
+            <div class="stat-label">Within Weeks</div>
+        </div>
+    </div>
+    
+    <!-- Pricing Section -->
+    <section class="pricing-section">
+        <div class="section-header">
+            <h2 class="section-title">Investment Options</h2>
+            <p class="section-subtitle">Choose the partnership model that best fits your business growth strategy</p>
+        </div>
+        
+        <div class="pricing-grid">
+            <!-- Option A: Full Buyout -->
+            <div class="pricing-card">
+                <div class="card-header">
+                    <span class="option-label">OPTION A</span>
+                    <h3 class="card-title">Full Buyout</h3>
+                    <p class="card-subtitle">One-Time Fee</p>
+                </div>
+                <div class="price-container">
+                    <div class="price-range">$75,000 - $125,000</div>
+                    <div class="price-label">Complete ownership & licensing</div>
+                </div>
+                <ul class="features-list">
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Full Solar Appointment + AI Territory Intelligence System</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Mobile App for All Your Reps</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Dashboards & Gamification Suite</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Optional Custom Enhancements</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>White-Label Branding Available</span>
+                    </li>
+                </ul>
+                <div class="pros-section">
+                    <div class="pros-label">Pros</div>
+                    <p class="pros-text">Immediate turnkey system, no ongoing payments, full control</p>
+                </div>
+                <button class="cta-button" onclick="openModal('Option A - Full Buyout', '$75,000 - $125,000')">
+                    Get Started
+                </button>
+            </div>
+            
+            <!-- Option B: Revenue Share (Featured) -->
+            <div class="pricing-card featured">
+                <div class="featured-badge">Most Popular</div>
+                <div class="card-header">
+                    <span class="option-label">OPTION B</span>
+                    <h3 class="card-title">Revenue Share</h3>
+                    <p class="card-subtitle">+ Small Upfront</p>
+                </div>
+                <div class="price-container">
+                    <div class="price-range">$10,000 - $20,000</div>
+                    <div class="price-label">Upfront investment</div>
+                    <div class="rev-share">
+                        <span class="rev-share-text">+ 4-6% Revenue Share Per Install</span>
+                    </div>
+                </div>
+                <ul class="features-list">
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Full Platform Access & Updates</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Ongoing Support & Maintenance</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Performance-Based Partnership</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Aligned Incentives for Growth</span>
+                    </li>
+                </ul>
+                <div class="pros-section">
+                    <div class="pros-label">Pros</div>
+                    <p class="pros-text">Residual income, aligned incentives, low upfront risk for partner</p>
+                </div>
+                <div class="addon-section">
+                    <div class="addon-label">
+                        <i class="fas fa-robot"></i>
+                        Optional: AI Territory Bot Exclusivity
+                    </div>
+                    <div class="addon-price">$5,000 - $10,000</div>
+                    <p class="addon-desc">Lock out competitors in your territory</p>
+                </div>
+                <button class="cta-button" onclick="openModal('Option B - Revenue Share', '$10,000 - $20,000 + 4-6% per install')">
+                    Get Started
+                </button>
+            </div>
+            
+            <!-- Option C: Hybrid -->
+            <div class="pricing-card">
+                <div class="card-header">
+                    <span class="option-label">OPTION C</span>
+                    <h3 class="card-title">Hybrid</h3>
+                    <p class="card-subtitle">Balanced Approach</p>
+                </div>
+                <div class="price-container">
+                    <div class="price-range">$15,000 - $30,000</div>
+                    <div class="price-label">Upfront investment</div>
+                    <div class="rev-share">
+                        <span class="rev-share-text">+ 5% Revenue Share Per Install</span>
+                    </div>
+                </div>
+                <ul class="features-list">
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Full Platform Access & Updates</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Balanced Cash Flow Model</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Long-Term Revenue Upside</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check"></i>
+                        <span>Strategic Partnership Positioning</span>
+                    </li>
+                </ul>
+                <div class="pros-section">
+                    <div class="pros-label">Pros</div>
+                    <p class="pros-text">Balanced immediate cash + long-term upside, Strategic Hustle positioning</p>
+                </div>
+                <div class="addon-section">
+                    <div class="addon-label">
+                        <i class="fas fa-robot"></i>
+                        Optional: AI Territory Bot Exclusivity
+                    </div>
+                    <div class="addon-price">$10,000 - $15,000</div>
+                    <p class="addon-desc">Maximum competitive advantage</p>
+                </div>
+                <button class="cta-button" onclick="openModal('Option C - Hybrid', '$15,000 - $30,000 + 5% per install')">
+                    Get Started
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Strategic Notes Section -->
+    <section class="strategy-section">
+        <div class="strategy-container">
+            <div class="strategy-header">
+                <h3 class="strategy-title">
+                    <i class="fas fa-chess"></i>
+                    Strategic Notes
+                </h3>
+            </div>
+            <div class="strategy-cards">
+                <div class="strategy-card">
+                    <div class="strategy-card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4>ROI Statement</h4>
+                    <p>"Even at 4-6% rev share, the system pays for itself within weeks by increasing appointments, installs, and revenue."</p>
+                </div>
+                <div class="strategy-card">
+                    <div class="strategy-card-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h4>Upsell Opportunity</h4>
+                    <p>AI Territory Bot exclusivity provides maximum competitive advantage. Lock your territory before competitors do.</p>
+                </div>
+                <div class="strategy-card">
+                    <div class="strategy-card-icon">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </div>
+                    <h4>Future-Proof</h4>
+                    <p>Scalable, multi-partner SaaS-ready optional expansion. Grow your solar empire without limits.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="section-header">
+            <h2 class="section-title">What's Included</h2>
+            <p class="section-subtitle">Everything you need to dominate your solar territory</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h4>AI Lead Scoring</h4>
+                <p>Automatically score and prioritize leads based on 15+ data points</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h4>Territory Intelligence</h4>
+                <p>Heat maps, ZIP analysis, and optimized route planning</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h4>Mobile Rep App</h4>
+                <p>iOS & Android apps for your entire sales team</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h4>Gamification</h4>
+                <p>Leaderboards, badges, and incentives to drive performance</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h4>AI Sales Coach</h4>
+                <p>Real-time suggestions and objection handling</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h4>Advanced Analytics</h4>
+                <p>Revenue forecasts, conversion tracking, and ROI dashboards</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">Solar Empire</div>
+        <p class="footer-text">AI Appointment + Territory Intelligence System</p>
+        <p class="footer-text" style="margin-top: 8px;">© 2024 Solar Empire. All rights reserved.</p>
+    </footer>
+    
+    <!-- Contact Modal -->
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div id="formContainer">
+                <div class="modal-header">
+                    <h3 class="modal-title">Let's Talk</h3>
+                    <p class="modal-subtitle">Fill out the form below and we'll get back to you within 24 hours</p>
+                    <div class="selected-plan-badge" id="selectedPlan">
+                        <i class="fas fa-check-circle"></i>
+                        <span id="planText">Option B - Revenue Share</span>
+                    </div>
+                </div>
+                
+                <div class="modal-body">
+                    <form id="contactForm" onsubmit="submitForm(event)">
+                        <div class="form-group">
+                            <label class="form-label">Company Name *</label>
+                            <input type="text" class="form-input" name="company" placeholder="Your Solar Company" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Contact Name *</label>
+                            <input type="text" class="form-input" name="name" placeholder="John Smith" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-input" name="email" placeholder="john@solarcompany.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone *</label>
+                            <input type="tel" class="form-input" name="phone" placeholder="(555) 123-4567" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Number of Sales Reps</label>
+                            <input type="number" class="form-input" name="reps" placeholder="e.g., 15">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Territories of Interest</label>
+                            <input type="text" class="form-input" name="territories" placeholder="e.g., Phoenix, Scottsdale, Mesa">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Additional Notes</label>
+                            <textarea class="form-input" name="notes" placeholder="Tell us about your current challenges or goals..."></textarea>
+                        </div>
+                        <input type="hidden" name="selected_plan" id="hiddenPlan">
+                        <input type="hidden" name="price_range" id="hiddenPrice">
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="exclusivity" name="exclusivity">
+                            <label for="exclusivity">I'm interested in AI Territory Bot Exclusivity for my region</label>
+                        </div>
+                        <button type="submit" class="submit-button" id="submitBtn">
+                            Submit Inquiry
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div id="successContainer" style="display: none;">
+                <div class="success-message">
+                    <div class="success-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h3 class="success-title">Thank You!</h3>
+                    <p class="success-text">Your inquiry has been submitted successfully. We'll be in touch within 24 hours to discuss your Solar Empire partnership.</p>
+                    <button class="cta-button" onclick="closeModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentPlan = '';
+        let currentPrice = '';
+        
+        function openModal(plan, price) {
+            currentPlan = plan;
+            currentPrice = price;
+            document.getElementById('planText').textContent = `${plan} (${price})`;
+            document.getElementById('hiddenPlan').value = plan;
+            document.getElementById('hiddenPrice').value = price;
+            document.getElementById('contactModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Reset form state
+            document.getElementById('formContainer').style.display = 'block';
+            document.getElementById('successContainer').style.display = 'none';
+            document.getElementById('contactForm').reset();
+        }
+        
+        function closeModal() {
+            document.getElementById('contactModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close modal on outside click
+        document.getElementById('contactModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+        
+        async function submitForm(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> Submitting...';
+            
+            const formData = new FormData(form);
+            const data = {
+                company: formData.get('company'),
+                name: formData.get('name'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                reps: formData.get('reps') || 'Not specified',
+                territories: formData.get('territories') || 'Not specified',
+                notes: formData.get('notes') || '',
+                selected_plan: formData.get('selected_plan'),
+                price_range: formData.get('price_range'),
+                wants_exclusivity: formData.get('exclusivity') === 'on'
+            };
+            
+            try {
+                const response = await fetch('/api/business-inquiry', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    // Show success state
+                    document.getElementById('formContainer').style.display = 'none';
+                    document.getElementById('successContainer').style.display = 'block';
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.detail || 'Something went wrong. Please try again.'));
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Submit Inquiry';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Network error. Please check your connection and try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Inquiry';
+            }
+        }
+    </script>
+</body>
+</html>

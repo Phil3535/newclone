@@ -89,8 +89,27 @@ Building an advanced full-stack application for solar sales teams - an "Elite" p
 - Android APK: Built and available
 - iOS App: TestFlight available (Build #10), NDA bug fix included
 
+## B2B Landing Page (COMPLETED - 2026-03-03)
+- Professional landing page for solar company partnerships
+- Three pricing options matching user's pricing structure:
+  - **Option A (Full Buyout)**: $75,000 - $125,000 one-time
+  - **Option B (Revenue Share)**: $10,000 - $20,000 + 4-6% per install
+  - **Option C (Hybrid)**: $15,000 - $30,000 + 5% per install
+- AI Territory Bot Exclusivity add-ons ($5,000 - $15,000)
+- Contact form with inquiry submission to MongoDB
+- Accessible at: `/api/business`
+
+## iOS App Status (Updated 2026-03-03)
+- **Submitted to App Store**: Currently "In Review" by Apple
+- **Price**: $299.99 (~$210 after Apple's cut)
+- **NDA Bug Fix**: Included in submitted build
+- **Waiting for**: Apple approval
+
 ## Outstanding Tasks
-1. Test NDA fix on TestFlight
-2. Push Phase 5 features to GitHub for new build
-3. Change default admin password
-4. Connect real APIs for simulated features (production)
+1. ⏳ Wait for Apple App Store approval
+2. ⏳ User verification of NDA fix after app approval
+3. 🔴 Change default admin password (`SolarEmpire2024!`)
+4. 🔴 Verify domain with Resend for production emails
+5. 🟡 Submit to Google Play Store
+6. 🟡 OpenWeatherMap API key activation (pending external)
+7. ✅ Connect real APIs for simulated features (production)

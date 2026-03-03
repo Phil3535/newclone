@@ -7,7 +7,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://empire-sales-suite.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://solar-lead-monetize.preview.emergentagent.com')
 
 # Test credentials from problem statement
 TEST_USER_ID = "301b2e32-f221-48df-a8c1-bfae3a76c4c6"

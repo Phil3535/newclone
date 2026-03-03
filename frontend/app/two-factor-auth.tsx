@@ -17,7 +17,7 @@ import { useRouter } from 'expo-router';
 import { useLanguage } from '../src/contexts/LanguageContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://empire-sales-suite.preview.emergentagent.com';
+const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://solar-lead-monetize.preview.emergentagent.com';
 
 export default function TwoFactorAuthScreen() {
   const router = useRouter();

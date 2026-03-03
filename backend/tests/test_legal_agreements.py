@@ -10,7 +10,7 @@ import os
 import uuid
 from datetime import datetime
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://empire-sales-suite.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://solar-lead-monetize.preview.emergentagent.com').rstrip('/')
 
 class TestLegalAgreementAPI:
     """Legal Agreement endpoint tests"""

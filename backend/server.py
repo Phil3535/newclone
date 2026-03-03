@@ -4130,6 +4130,106 @@ async def serve_static_file(filename: str):
         return FileResponse(file_path)
     raise HTTPException(status_code=404, detail="File not found")
 
+# ============== B2B LANDING PAGE & BUSINESS INQUIRY ==============
+TEMPLATES_DIR = Path(__file__).parent / "templates"
+
+@api_router.get("/business", include_in_schema=False)
+async def serve_business_landing_page():
+    """Serve the B2B landing page for solar company partnerships"""
+    template_file = TEMPLATES_DIR / "payment_portal.html"
+    if template_file.exists():
+        return FileResponse(template_file, media_type="text/html")
+    raise HTTPException(status_code=404, detail="Landing page not found")
+
+class BusinessInquiry(BaseModel):
+    company: str
+    name: str
+    email: str
+    phone: str
+    reps: Optional[str] = None
+    territories: Optional[str] = None
+    notes: Optional[str] = None
+    selected_plan: str
+    price_range: str
+    wants_exclusivity: bool = False
+
+@api_router.post("/business-inquiry")
+async def submit_business_inquiry(inquiry: BusinessInquiry):
+    """Submit a B2B partnership inquiry"""
+    # Store the inquiry in the database
+    inquiry_doc = {
+        "id": str(uuid.uuid4()),
+        "company": inquiry.company,
+        "name": inquiry.name,
+        "email": inquiry.email,
+        "phone": inquiry.phone,
+        "reps_count": inquiry.reps,
+        "territories": inquiry.territories,
+        "notes": inquiry.notes,
+        "selected_plan": inquiry.selected_plan,
+        "price_range": inquiry.price_range,
+        "wants_exclusivity": inquiry.wants_exclusivity,
+        "status": "new",
+        "created_at": datetime.utcnow()
+    }
+    
+    await db.business_inquiries.insert_one(inquiry_doc)
+    
+    # Send notification email if Resend is configured
+    try:
+        from routes.integrations import RESEND_API_KEY
+        if RESEND_API_KEY:
+            import resend
+            resend.api_key = RESEND_API_KEY
+            
+            # Send notification to admin
+            resend.Emails.send({
+                "from": "Solar Empire <notifications@resend.dev>",
+                "to": ["philromero35@gmail.com"],
+                "subject": f"🔥 New B2B Inquiry: {inquiry.company} - {inquiry.selected_plan}",
+                "html": f"""
+                <h2>New Business Partnership Inquiry</h2>
+                <p><strong>Company:</strong> {inquiry.company}</p>
+                <p><strong>Contact:</strong> {inquiry.name}</p>
+                <p><strong>Email:</strong> {inquiry.email}</p>
+                <p><strong>Phone:</strong> {inquiry.phone}</p>
+                <p><strong>Number of Reps:</strong> {inquiry.reps or 'Not specified'}</p>
+                <p><strong>Territories:</strong> {inquiry.territories or 'Not specified'}</p>
+                <p><strong>Selected Plan:</strong> {inquiry.selected_plan}</p>
+                <p><strong>Price Range:</strong> {inquiry.price_range}</p>
+                <p><strong>Wants Exclusivity:</strong> {'Yes' if inquiry.wants_exclusivity else 'No'}</p>
+                <p><strong>Notes:</strong> {inquiry.notes or 'None'}</p>
+                <hr>
+                <p><em>Submitted at: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}</em></p>
+                """
+            })
+            logger.info(f"Business inquiry notification sent for {inquiry.company}")
+    except Exception as e:
+        logger.warning(f"Could not send inquiry notification email: {e}")
+    
+    return {
+        "success": True,
+        "message": "Thank you for your inquiry! We'll be in touch within 24 hours.",
+        "inquiry_id": inquiry_doc["id"]
+    }
+
+@api_router.get("/business-inquiries")
+async def get_business_inquiries(status: Optional[str] = None, limit: int = 50):
+    """Get all business inquiries (admin only)"""
+    query = {}
+    if status:
+        query["status"] = status
+    
+    inquiries = await db.business_inquiries.find(query).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # Convert ObjectId and datetime for JSON serialization
+    for inquiry in inquiries:
+        inquiry.pop("_id", None)
+        if isinstance(inquiry.get("created_at"), datetime):
+            inquiry["created_at"] = inquiry["created_at"].isoformat()
+    
+    return {"inquiries": inquiries, "total": len(inquiries)}
+
 # Include the main API router
 app.include_router(api_router)
 
