@@ -82,3 +82,7 @@ frontend/node_modules/.cache/default-development/1.pack
 # Note: .env files are NOT ignored - they are needed for deployment
 
 # Note: .env files ARE tracked - they are needed for Emergent deployment
+-e 
+# Environment files
+*.env
+*.env.*
