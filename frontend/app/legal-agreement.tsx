@@ -326,23 +326,23 @@ export default function LegalAgreementScreen({ onAccept, isReaccept = false }: L
     if (!allChecked) return;
     
     setSubmitting(true);
-    try {
-      // Store acceptance locally
-      const acceptanceData = {
-        accepted_at: new Date().toISOString(),
-        agreements: Object.keys(agreements),
-        version: '1.0',
-      };
-      
-      // Try to save to AsyncStorage, but don't block on failure
-      try {
-        await AsyncStorage.setItem('legal_agreements_accepted', JSON.stringify(acceptanceData));
-      } catch (storageError) {
-        console.warn('Failed to save to AsyncStorage:', storageError);
-        // Continue anyway - the app should still work
-      }
-      
-      // Also send to backend for record keeping (non-blocking)
+    
+    // IMMEDIATELY mark that we're transitioning - don't wait for storage
+    const acceptanceData = {
+      accepted_at: new Date().toISOString(),
+      agreements: Object.keys(agreements),
+      version: '1.0',
+    };
+    
+    // Fire and forget - save to storage in background
+    // This is non-blocking to ensure the app always progresses
+    setTimeout(() => {
+      AsyncStorage.setItem('legal_agreements_accepted', JSON.stringify(acceptanceData))
+        .catch((e) => console.warn('Storage save failed:', e));
+    }, 0);
+    
+    // Fire and forget - send to backend in background
+    setTimeout(() => {
       fetch(`${API_URL}/api/legal/accept`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -350,17 +350,15 @@ export default function LegalAgreementScreen({ onAccept, isReaccept = false }: L
           user_id: '301b2e32-f221-48df-a8c1-bfae3a76c4c6',
           ...acceptanceData,
         }),
-      }).catch(() => {}); // Silent fail - local storage is primary
-      
-      // ALWAYS call onAccept to navigate away from this screen
-      onAccept();
-    } catch (error) {
-      console.error('Error in handleAccept:', error);
-      // Even on error, still try to proceed
-      onAccept();
-    } finally {
+      }).catch(() => {}); // Silent fail
+    }, 0);
+    
+    // Small delay to show button state, then ALWAYS proceed
+    setTimeout(() => {
       setSubmitting(false);
-    }
+      // CRITICAL: Always call onAccept - never let storage failures block this
+      onAccept();
+    }, 300);
   };
 
   return (

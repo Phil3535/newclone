@@ -154,7 +154,18 @@ function RootLayoutContent() {
         return;
       }
 
-      const acceptance = await AsyncStorage.getItem('legal_agreements_accepted');
+      // Try to get acceptance from storage, but handle failures gracefully
+      let acceptance = null;
+      try {
+        acceptance = await AsyncStorage.getItem('legal_agreements_accepted');
+      } catch (storageError) {
+        console.warn('AsyncStorage read failed, showing legal agreement:', storageError);
+        // If storage fails, show the agreement screen
+        setShowLegalAgreement(true);
+        setCheckingLegal(false);
+        return;
+      }
+      
       if (!acceptance) {
         setShowLegalAgreement(true);
         setCheckingLegal(false);
@@ -162,25 +173,37 @@ function RootLayoutContent() {
       }
 
       // Check with backend if version has changed and re-acceptance is needed
-      const acceptanceData = JSON.parse(acceptance);
-      const userId = '301b2e32-f221-48df-a8c1-bfae3a76c4c6'; // Demo user ID
-      
       try {
-        const response = await fetch(`${API_URL}/api/legal/status/${userId}`);
-        const status = await response.json();
+        const acceptanceData = JSON.parse(acceptance);
+        const userId = '301b2e32-f221-48df-a8c1-bfae3a76c4c6'; // Demo user ID
         
-        if (status.needs_reaccept) {
-          // Clear local storage and show legal screen again
-          await AsyncStorage.removeItem('legal_agreements_accepted');
-          setShowLegalAgreement(true);
-          setIsReaccept(true);
+        const response = await fetch(`${API_URL}/api/legal/status/${userId}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        if (response.ok) {
+          const status = await response.json();
+          if (status.needs_reaccept) {
+            // Clear local storage and show legal screen again
+            try {
+              await AsyncStorage.removeItem('legal_agreements_accepted');
+            } catch (e) {
+              console.warn('Failed to clear storage:', e);
+            }
+            setShowLegalAgreement(true);
+            setIsReaccept(true);
+          }
         }
+        // If API fails or returns not OK, just continue - don't block
       } catch (apiError) {
-        // If API fails, use local storage check as fallback
-        console.log('API check failed, using local storage');
+        // If API fails, use local storage check as fallback - don't block the app
+        console.log('API check failed, using local storage:', apiError);
       }
     } catch (error) {
       console.error('Error checking legal acceptance:', error);
+      // On any error, show the legal agreement to be safe
+      setShowLegalAgreement(true);
     } finally {
       setCheckingLegal(false);
     }
@@ -188,8 +211,11 @@ function RootLayoutContent() {
 
   const handleLegalAccept = () => {
     console.log('Legal agreements accepted, transitioning to main app...');
+    // Force the state changes to happen immediately and synchronously
     setShowLegalAgreement(false);
     setIsReaccept(false);
+    // Log to confirm state change
+    console.log('State updated: showLegalAgreement = false');
   };
 
   // Show loading while checking legal status
